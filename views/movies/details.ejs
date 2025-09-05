@@ -1,0 +1,27 @@
+<%- include('../partials/header') %>
+
+<main class="container" style="align-items: stretch;">
+  <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; justify-content: center; align-items: flex-start; max-width: 900px; margin: 2rem auto;">
+    <div style="flex: 0 0 260px;">
+      <img src="https://image.tmdb.org/t/p/original<%= movie.poster_path %>" alt="<%= movie.title %> poster" style="width: 100%; max-width: 260px; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.25);" />
+    </div>
+    <div style="flex: 1; min-width: 260px;">
+      <h1 style="color: #fbbf24; font-size: 2.2rem; margin-bottom: 0.7rem;"> <%= movie.title %> </h1>
+      <div style="font-size: 1.1rem; color: #a3a3a3; font-style: italic; margin-bottom: 1.2rem;"> <%= movie.tagline %> </div>
+      <div style="margin-bottom: 1.5rem; color: #e5e7eb; font-size: 1.08rem;"> <%= movie.overview %> </div>
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+        <span style="font-weight: 600; color: #fbbf24;">Runtime:</span>
+        <div style="background: #29292f; color: #e5e7eb; border-radius: 8px; padding: 0.3rem 0.9rem; font-size: 0.98rem;"> <%= Math.floor(movie.runtime / 60) %>h <%= movie.runtime % 60 %>m </div>
+      </div>
+      <div style="margin-bottom: 1.5rem;">
+        <span style="font-weight: 600; color: #fbbf24;">Genres:</span>
+        <% movie.genres.forEach(function(genre, idx) { %>
+          <span style="background: #29292f; color: #e5e7eb; border-radius: 8px; padding: 0.3rem 0.9rem; margin-right: 0.7rem; font-size: 0.98rem;"> <%= genre.name %> </span>
+        <% }); %>
+      </div>
+      <a href="/movies/<%= movie.id %>/watch" style="text-decoration: none;"><button class="cta-btn" style="font-size: 1.15rem; padding: 1rem 2.5rem;">Watch Now</button></a>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>  
