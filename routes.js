@@ -1,5 +1,8 @@
 import express from "express";
-import { errorController, indexController } from "./controllers/main.controller.js";
+import {
+  errorController,
+  indexController,
+} from "./controllers/main.controller.js";
 import {
   movieDetailsController,
   watchMovie,
@@ -22,5 +25,3 @@ router.get("/movies/:id/watch", watchMovie);
 router.get("/tvshows", tvIndexController);
 router.get("/tvshows/:id", tvDetailsController);
 router.get("/tvshows/:id/season/:season/episode/:episode", watchTvShow);
-
-router.get(errorController);
