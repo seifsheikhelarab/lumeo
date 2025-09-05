@@ -4,6 +4,7 @@
   <div class="watch-wrapper">
     <h1 class="watch-title">Enjoy!!</h1>
     <iframe
+      id="watch-iframe"
       src="https://moviesapi.to/movie/<%= id %>"
       frameborder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -11,11 +12,42 @@
       class="watch-frame"
     ></iframe>
     <div class="watch-controls">
+      <div class="watch-server">
+        <select id="watch-server-select" onchange="changeServer()">
+          <option value="moviesapi">Server 1</option>
+          <option value="vidfast">Server 2</option>
+          <option value="pstream">Server 3</option>
+          <option value="rivestream">Server 4</option>
+          <option value="videasy">Server 5</option>
+        </select>
+      </div>
+
       <a href="/movies/<%= id %>">
         <button class="cta-btn watch-back-btn">Go Back</button>
       </a>
     </div>
   </div>
 </main>
+
+<script>
+  function changeServer() {
+    const select = document.querySelector("#watch-server-select");
+    const iframe = document.querySelector("#watch-iframe");
+
+    if (select.value == "moviesapi") {
+      iframe.src = "https://moviesapi.to/tv/<%= id %>";
+      return;
+    } else if (select.value == "vidfast") {
+      iframe.src = "https://vidfast.pro/movie/<%= id %>";
+      return;
+    } else if (select.value == "pstream") {
+      iframe.src = `https://iframe.pstream.org/embed/tmdb-movie-<%= id %>`;
+    } else if (select.value == "rivestream") {
+      iframe.src = `https://rivestream.org/embed?type=movie&id=<%= id %>`;
+    } else if (select.value == "videasy") {
+      iframe.src = `https://player.videasy.net/movie/<%= id %>&color=8B5CF6&provider=Poseidon`;
+    }
+  }
+</script>
 
 <%- include('../partials/footer') %>
