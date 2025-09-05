@@ -36,7 +36,7 @@ Lumeo is a movie and TV show platform built using Node.js, Express.js, and EJS. 
 This project is created **strictly for educational and personal learning purposes only**.
 
 - All movie and TV show data is fetched from [TMDB](https://www.themoviedb.org/).
-- Streaming sources are retrieved from [moviesapi.to](https://moviesapi.to/).
+- Streaming sources are retrieved from various APIs.
 - I do **not** own, host, or distribute any of the content shown in this app.
 - This project is **not intended for commercial use** and should not be used to access copyrighted material illegally.
 
