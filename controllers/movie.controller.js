@@ -1,37 +1,37 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+const tmdbUrl = "https://api.themoviedb.org/3";
+const options = {
+  method: "GET",
+  headers: {
+    accept: "application/json",
+    Authorization: `Bearer ${process.env.TMDB_RAT}`,
+  },
+};
+
 export async function movieIndexController(req, res) {
   const page = req.query.page || 1;
-  const query = req.query.query || "";
+  const url = req.query.query
+    ? `${tmdbUrl}/search/movie?query=${req.query.query}&page=${page}`
+    : `${tmdbUrl}/discover/movie?include_adult=false&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc`;
 
-  const response = await fetch(
-    `https://moviesapi.to/api/discover/movie?direction=desc&page=${page}&query=${query}`
-  );
-  const data = await response.json();
-
-  if (data.result === true) {
-    res.render("movies/index", {
-      movies: data.data,
-      page,
-      lastPage: data.last_page,
-      query,
-    });
-  } else {
-    res.render("movies/index", { movies: [], page, lastPage: 0, query });
-  }
+  fetch(url, options)
+    .then((res) => res.json())
+    .then((json) => {
+      res.render("movies/index", {
+        movies: json.results,
+        page,
+        lastPage: json.total_pages,
+        query: req.query.query,
+      });
+    })
+    .catch((err) => console.error(err));
 }
 
 export function movieDetailsController(req, res) {
-  let id = req.params.id;
-  const url = `https://api.themoviedb.org/3/movie/${id}?language=en-US`;
-  const options = {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      Authorization: `Bearer ${process.env.TMDB_RAT}`,
-    },
-  };
+  const id = req.params.id;
+  const url = `${tmdbUrl}/movie/${id}?language=en-US`;
 
   fetch(url, options)
     .then((res) => res.json())
@@ -42,6 +42,7 @@ export function movieDetailsController(req, res) {
 }
 
 export function watchMovie(req, res) {
-  let id = req.params.id;
+  const id = req.params.id;
   res.render("movies/watch", { id });
 }
+

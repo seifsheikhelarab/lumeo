@@ -1,0 +1,31 @@
+.watch-main {
+  align-items: stretch;
+}
+
+.watch-wrapper {
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.watch-title {
+  color: #fbbf24;
+  margin-bottom: 1.5rem;
+}
+
+.watch-frame {
+  width: 100%;
+  height: 500px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.watch-controls {
+  margin-top: 2.5rem;
+}
+
+.watch-back-btn {
+  font-size: 1.05rem;
+  padding: 0.8rem 2.2rem;
+}

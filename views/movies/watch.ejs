@@ -1,30 +1,18 @@
 <%- include('../partials/header') %>
 
-<main class="container" style="align-items: stretch">
-  <div
-    style="width: 100%; max-width: 900px; margin: 2rem auto; text-align: center"
-  >
-    <h1 style="color: #fbbf24; margin-bottom: 1.5rem">Enjoy!!</h1>
+<main class="container watch-main">
+  <div class="watch-wrapper">
+    <h1 class="watch-title">Enjoy!!</h1>
     <iframe
       src="https://moviesapi.to/movie/<%= id %>"
       frameborder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       allowfullscreen
-      style="
-        width: 100%;
-        height: 500px;
-        border-radius: 16px;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-      "
+      class="watch-frame"
     ></iframe>
-    <div style="margin-top: 2.5rem">
+    <div class="watch-controls">
       <a href="/movies/<%= id %>">
-        <button
-          class="cta-btn"
-          style="font-size: 1.05rem; padding: 0.8rem 2.2rem"
-        >
-          Go Back
-        </button>
+        <button class="cta-btn watch-back-btn">Go Back</button>
       </a>
     </div>
   </div>

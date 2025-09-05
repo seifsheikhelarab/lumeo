@@ -1,143 +1,48 @@
 <%- include('../partials/header') %>
 
-<style>
-  .movie-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 2rem;
-  }
-
-  .movie-card {
-    aspect-ratio: 9/16;
-    width: 100%;
-    min-width: 0;
-    max-height: 15rem;
-    background: #23232a;
-    border-radius: 16px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
-    padding: 0.7rem 0.7rem 1.2rem 0.7rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s;
-  }
-
-  .movie-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-  }
-</style>
-
+<link rel="stylesheet" href="/css/discover.style.css" />
 <main class="container" style="align-items: stretch">
-  <div style="width: 100%; max-width: 900px; margin: 0 auto">
-    <form
-      method="GET"
-      action="/movies"
-      style="margin-bottom: 2rem; display: flex; justify-content: center"
-    >
+  <div class="inside">
+    <form method="GET" action="/movies" class="search-form">
       <input
         type="text"
         name="query"
         placeholder="Search by Title"
         value="<%= query %>"
-        style="
-          width: 60%;
-          padding: 0.8rem 1rem;
-          border-radius: 30px;
-          border: none;
-          background: #23232a;
-          color: #e5e7eb;
-          font-size: 1rem;
-          margin-right: 1rem;
-          outline: none;
-        "
+        class="search-input"
       />
       <button type="submit" class="cta-btn" style="margin-top: 0">
         Search
       </button>
     </form>
-    <div class="movie-grid">
+    <div class="discover-grid">
       <% movies.forEach(function(movie) { %>
-      <a
-        href="/movies/<%= movie.tmdbid %>"
-        style="text-decoration: none; color: inherit"
-      >
+      <a href="/movies/<%= movie.id %>" class="discover-card-link">
         <div
-          class="movie-card"
-          style="background: url(./img/noPoster.png) center/cover, #23232a"
+          class="discover-card"
+          style="
+            background: url(https://image.tmdb.org/t/p/original<%= movie.poster_path %>)
+                center/cover,
+              #64646e;
+          "
         >
-          <div
-            style="
-              position: absolute;
-              inset: 0;
-              background: rgba(24, 24, 27, 0.78);
-              border-radius: 16px;
-            "
-          ></div>
-          <div
-            style="
-              position: relative;
-              z-index: 1;
-              font-size: 1.1rem;
-              font-weight: 700;
-              color: #fbbf24;
-              margin-bottom: 0.5rem;
-              word-break: break-word;
-            "
-          >
-            <%= movie.orig_title %>
-          </div>
-          <div
-            style="
-              position: relative;
-              z-index: 1;
-              color: #a3a3a3;
-              font-size: 0.95rem;
-              margin-bottom: 0.3rem;
-            "
-          >
-            <%= movie.year %>
-          </div>
-          <div
-            style="
-              position: relative;
-              z-index: 1;
-              color: #e5e7eb;
-              font-size: 0.95rem;
-              background: #29292f;
-              border-radius: 8px;
-              padding: 0.2rem 0.7rem;
-              display: inline-block;
-              margin-bottom: 0.2rem;
-            "
-          >
-            <%= movie.quality %>
-          </div>
+          <div class="card-overlay"></div>
+          <div class="card-title"><%= movie.original_title %></div>
+          <div class="card-subtitle"><%= movie.release_date %></div>
+          <div class="card-chip"><%= movie.vote_average %> / 10</div>
         </div>
       </a>
       <% }); %>
     </div>
-    <div
-      style="
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        margin-top: 2.5rem;
-      "
-    >
+    <div class="pagination">
       <% if (page > 1) { %>
-      <button class="cta-btn" style="padding: 0.7rem 2rem; font-size: 1rem">
+      <button class="cta-btn">
         <a class="btn-text" href="/movies?page=<%= Number(page) - 1 %>"
           >Previous</a
         >
       </button>
       <% } %> <% if (page < lastPage) { %>
-      <button class="cta-btn" style="padding: 0.7rem 2rem; font-size: 1rem">
+      <button class="cta-btn">
         <a class="btn-text" href="/movies?page=<%= Number(page) + 1  %>"
           >Next</a
         >

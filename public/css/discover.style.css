@@ -1,0 +1,144 @@
+.discover-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.2rem;
+}
+
+.discover-card {
+  aspect-ratio: 9/16;
+  width: 100%;
+  min-width: 0;
+  background: #23232a;
+  border-radius: 16px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+  padding: 0.7rem 0.7rem 1.2rem 0.7rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.discover-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .discover-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+  }
+
+  .discover-card {
+    padding: 0.4rem 0.4rem 0.8rem 0.4rem;
+    font-size: 0.95rem;
+  }
+
+  main.container {
+    padding: 0.5rem;
+  }
+
+  form {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  form input {
+    width: 100% !important;
+    margin-right: 0 !important;
+    margin-bottom: 0.7rem;
+  }
+
+  .cta-btn {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.7rem 0;
+  }
+
+  .btn-text {
+    font-size: 1rem;
+  }
+
+  .discover-card div {
+    font-size: 0.95rem !important;
+  }
+}
+
+.search-input {
+  width: 60%;
+  padding: 0.8rem 1rem;
+  border-radius: 30px;
+  border: none;
+  background: #23232a;
+  color: #e5e7eb;
+  font-size: 1rem;
+  margin-right: 1rem;
+  outline: none;
+}
+
+.search-form {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center
+}
+
+.inside {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 24, 27, 0.78);
+  border-radius: 16px;
+}
+
+.card-title {
+  position: relative;
+  z-index: 1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+
+.card-subtitle {
+  position: relative;
+  z-index: 1;
+  color: #a3a3a3;
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+
+.card-chip {
+  position: relative;
+  z-index: 1;
+  color: #e5e7eb;
+  font-size: 0.95rem;
+  background: #29292f;
+  border-radius: 8px;
+  padding: 0.2rem 0.7rem;
+  display: inline-block;
+  margin-bottom: 0.2rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.discover-card-link {
+  text-decoration: none;
+  color: inherit
+}
