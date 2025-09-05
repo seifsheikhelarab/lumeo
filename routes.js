@@ -1,8 +1,5 @@
 import express from "express";
-import {
-  errorController,
-  indexController,
-} from "./controllers/main.controller.js";
+import { indexController } from "./controllers/main.controller.js";
 import {
   movieDetailsController,
   watchMovie,
