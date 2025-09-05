@@ -15,7 +15,6 @@ app.set("views", path.join(process.cwd(), "views"));
 app.use(express.static(path.join(process.cwd(), "public")));
 
 app.use("/", router);
-app.use((req, res) => res.status(404).render("error", { error: "Page not found"}));
 
 // Start server
 const port = process.env.PORT || 4650;
