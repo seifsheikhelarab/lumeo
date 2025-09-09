@@ -1,5 +1,5 @@
 body {
-  background: #18181b;
+  background: #1A1A1D;
   color: #e5e7eb;
   font-family: "Montserrat", sans-serif;
   margin: 0;
@@ -16,14 +16,14 @@ header {
 .logo {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #fbbf24;
+  color: #a64d79;
   letter-spacing: 2px;
-  margin: 0
+  margin: 0;
 }
 
 .subtitle {
   font-size: 1.2rem;
-  color: #a3a3a3;
+  color: #6A1E55;
   margin-top: 0.5rem;
 }
 
@@ -33,10 +33,13 @@ header {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 0 1rem;
+  text-align: center;
+  margin: 0;
 }
 
 .cta-btn {
-  background: linear-gradient(90deg, #fbbf24 0%, #f59e42 100%);
+  background: linear-gradient(90deg, #f34ecc 0%, #b03894 100%);
   color: #18181b;
   border: none;
   padding: 1rem 2.5rem;
@@ -50,18 +53,18 @@ header {
 }
 
 .cta-btn:hover {
-  background: linear-gradient(90deg, #f59e42 0%, #fbbf24 100%);
+  background: linear-gradient(90deg, #aa1587 0%, #fc54d5 100%);
 }
 
 .title {
   text-decoration: none;
-  color: #fbbf24;
+  color: #A64D79;
 }
 
 .nav-link {
-  color: #fbbf24;
+  color: #A64D79;
   text-decoration: none;
-  font-weight: 600
+  font-weight: 600;
 }
 
 .features {
@@ -73,16 +76,18 @@ header {
 }
 
 .feature {
-  background: #23232a;
+  background: #3B1C32;
   border-radius: 16px;
   padding: 1.5rem 2rem;
   min-width: 220px;
+  max-width: 320px;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
   text-align: center;
+  flex: 1;
 }
 
 .feature-title {
-  color: #fbbf24;
+  color: #A64D79;
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -96,7 +101,7 @@ header {
 footer {
   text-align: center;
   padding: 1.5rem 0 1rem 0;
-  color: #52525b;
+  color: #3B1C32;
   font-size: 0.95rem;
 }
 
@@ -104,8 +109,8 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
-  background: #23232a;
+  padding: 1.2rem 1.5rem;
+  background: #3B1C32;
   border-bottom: 1px solid #29292f;
 }
 
@@ -118,10 +123,14 @@ nav {
 }
 
 .footer-text {
-  color: #fbbf24;
+  color: #A64D79;
   text-decoration: none;
   font-weight: 600;
-  margin-right: 1.5rem;
+  margin: 0 0.5rem;
+}
+
+.footer-text:not(:last-child) {
+  margin-right: 1rem;
 }
 
 .btn-text {
@@ -129,3 +138,98 @@ nav {
   text-decoration: none;
   font-weight: 600;
 }
+
+.warning {
+  color: #A64D79;
+  text-align: center;
+  margin: 2rem auto;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+  max-width: 800px;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.7rem;
+  }
+
+  .features {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .feature {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .warning {
+    font-size: 0.95rem;
+    padding: 1rem;
+  }
+
+  .logo {
+    font-size: 2rem;
+  }
+
+  .links {
+    gap: 1rem;
+  }
+
+  .cta-btn {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.9rem 0.5rem;
+  }
+
+  .feature {
+    padding: 1rem 1.5rem;
+  }
+
+  .feature-title {
+    font-size: 1rem;
+  }
+
+  .feature-desc {
+    font-size: 0.9rem;
+  }
+
+  .warning {
+    font-size: 0.9rem;
+    margin: 1.5rem auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .links {
+    gap: 0.5rem;
+  }
+
+  .cta-btn {
+    padding: 0.7rem 0.5rem;
+  }
+
+  .feature {
+    padding: 0.8rem 0;
+  }
+
+  .feature-title {
+    font-size: 0.9rem;
+  }
+
+  .feature-desc {
+    font-size: 0.8rem;
+  }
+
+  .warning {
+    font-size: 0.8rem;
+    margin: 1rem auto;
+  }
+}
+

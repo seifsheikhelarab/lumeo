@@ -29,14 +29,14 @@
 }
 
 .title {
-  color: #fbbf24;
+  color: #A64D79;
   font-size: 2.2rem;
   margin-bottom: 0.7rem;
 }
 
 .tagline {
   font-size: 1.1rem;
-  color: #a3a3a3;
+  color: #A64D79;
   font-style: italic;
   margin-bottom: 1.2rem;
 }
@@ -58,13 +58,13 @@
 
 .label {
   font-weight: 600;
-  color: #fbbf24;
+  color: #A64D79;
 }
 
 .runtime-box,
 .genre-tag,
 .episode-badge {
-  background: #29292f;
+  background: #3B1C32;
   color: #e5e7eb;
   border-radius: 8px;
   padding: 0.3rem 0.9rem;
@@ -87,7 +87,7 @@
 }
 
 .subtitle {
-  color: #fbbf24;
+  color: #A64D79;
   margin-bottom: 1.2rem;
 }
 
@@ -104,7 +104,7 @@
 .season-btn {
   width: 100%;
   background: linear-gradient(90deg, #23232a 60%, #29292f 100%);
-  color: #fbbf24;
+  color: #A64D79;
   font-size: 1.15rem;
   font-weight: 700;
   border: none;
@@ -142,14 +142,14 @@
 
 .season-dropdown {
   display: none;
-  background: #23232a;
+  background: #3B1C32;
   border-radius: 0 0 14px 14px;
   padding: 1.2rem 2rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
 }
 
 .season-overview {
-  color: #a3a3a3;
+  color: #A64D79;
   font-size: 1.05rem;
   margin-bottom: 1rem;
   font-style: italic;
@@ -175,11 +175,69 @@
 
 .watch-link {
   color: #e5e7eb;
-  text-decoration: none;
+  background: #851d677c;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 1.01rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.watch-link:hover {
+  background: #29292f;
 }
 
 .no-episodes {
-  color: #a3a3a3;
+  color: #6A1E55;
+}
+
+@media (max-width: 768px) {
+  .details-wrapper {
+    flex-direction: column;
+  }
+
+  .poster-container {
+    margin: 0 auto 1.5rem;
+  }
+
+  .details-content {
+    max-width: 600px;
+  }
+
+  .season-list {
+    width: 100%;
+  }
+
+  .season-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .season-btn {
+    width: 100%;
+  }
+
+  .season-poster {
+    margin: 0 auto 1rem;
+  }
+
+  .season-title {
+    text-align: center;
+    padding: 0 0.5rem;
+  }
+
+  .episode-list {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .episode-item {
+    margin-bottom: 1.5rem;
+  }
+
+  .episode-badge {
+    margin: 0 auto 0.7rem;
+  }
 }
