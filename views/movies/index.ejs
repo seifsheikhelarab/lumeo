@@ -25,7 +25,7 @@
           <div class="card-overlay"></div>
           <div class="card-title"><%= movie.original_title %></div>
           <div class="card-subtitle"><%= movie.release_date %></div>
-          <div class="card-chip"><%= movie.vote_average %> / 10</div>
+          <div class="card-chip"><%= movie.vote_average.toFixed(1) %> / 10</div>
         </div>
       </a>
       <% }); %>

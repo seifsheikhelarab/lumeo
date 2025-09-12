@@ -56,6 +56,10 @@
   gap: 1rem;
 }
 
+.genres{
+  flex-wrap: wrap;
+}
+
 .label {
   font-weight: 600;
   color: #A64D79;
