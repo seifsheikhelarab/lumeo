@@ -20,7 +20,11 @@
       <a href="/tvshows/<%= show.id %>" class="discover-card-link">
         <div
           class="discover-card"
+          <% if (show.poster_path == null) { %>
+            style="--poster:url('/img/noPoster.png')"
+          <% } else { %>
           style="--poster:url('https://image.tmdb.org/t/p/original<%= show.poster_path %>')"
+          <% } %>
         >
           <div class="card-overlay"></div>
           <div class="card-title"><%= show.name %></div>
@@ -33,12 +37,12 @@
     <div class="pagination">
       <% if (page > 1) { %>
       <button class="cta-btn">
-        <a class="btn-text" href="/tvshows?page=<%= Number(page) - 1 %>">Previous</a>
+        <a class="btn-text" href="/tvshows?page=<%= Number(page) - 1 %>&query=<%= query %>">Previous</a>
       </button>
       <% } %>
       <% if (page < lastPage) { %>
       <button class="cta-btn">
-        <a class="btn-text" href="/tvshows?page=<%= Number(page) + 1 %>">Next</a>
+        <a class="btn-text" href="/tvshows?page=<%= Number(page) + 1 %>&query=<%= query %>">Next</a>
       </button>
       <% } %>
     </div>

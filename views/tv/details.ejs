@@ -1,10 +1,13 @@
 <%- include('../partials/header') %>
-
 <main class="container details-main">
   <div class="details-wrapper">
     <div class="poster-container">
       <img
+      <% if (show.poster_path == null) { %>
+        src = "/img/noPoster.png"
+      <% } else { %>
         src="https://image.tmdb.org/t/p/original<%= show.poster_path %>"
+      <% } %>
         alt="<%= show.name %> poster"
         class="poster-img"
       />
@@ -41,7 +44,11 @@
           class="season-btn"
         >
           <img
+          <% if (season.poster_path == null) { %>
+            src = "/img/noPoster.png"
+          <% } else { %>
             src="https://image.tmdb.org/t/p/w92<%= season.poster_path %>"
+          <% } %>
             alt="Season <%= season.season_number %> poster"
             class="season-poster"
           />

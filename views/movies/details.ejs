@@ -4,7 +4,11 @@
   <div class="details-wrapper">
     <div class="poster-container">
       <img
+      <% if (movie.poster_path == null) { %>
+      src="/img/noPoster.png"
+      <% } else { %>
         src="https://image.tmdb.org/t/p/original<%= movie.poster_path %>"
+      <% } %>
         alt="<%= movie.title %> poster"
         class="poster-img"
       />
