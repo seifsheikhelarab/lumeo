@@ -1,48 +1,87 @@
-# Lumeo
+# Welcome to React Router!
 
-Lumeo is a movie and TV show platform built using Node.js, Express.js, and EJS. It uses the TMDB API to fetch movies and TV shows data and display them in a user-friendly interface.
+A modern, production-ready template for building full-stack React applications using React Router.
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
 
 ## Features
 
-- Displays popular movies and TV shows on the home page
-- Allows users to search for movies and TV shows
-- Displays details of movies and TV shows, including poster, title, overview, genres, and runtime
-- Allows users to watch movies and TV shows (using an external API)
+- 🚀 Server-side rendering
+- ⚡️ Hot Module Replacement (HMR)
+- 📦 Asset bundling and optimization
+- 🔄 Data loading and mutations
+- 🔒 TypeScript by default
+- 🎉 TailwindCSS for styling
+- 📖 [React Router docs](https://reactrouter.com/)
 
-## Development
-
-### Requirements
-
-- Node.js (version 14 or higher)
-- npm (version 6 or higher)
-- TMDB API key (get one from [here](https://www.themoviedb.org/documentation/api))
+## Getting Started
 
 ### Installation
 
-1. Clone the repository
-2. Install dependencies using npm by running `npm install`
-3. Create a `.env` file and add your TMDB API key to it
-4. Start the server by running `npm start`
+Install the dependencies:
 
-### Technologies Used
+```bash
+npm install
+```
 
-- Node.js
-- Express.js
-- EJS
-- TMDB API
+### Development
 
-## Disclaimer
+Start the development server with HMR:
 
-This project is created **strictly for educational and personal learning purposes only**.
+```bash
+npm run dev
+```
 
-- All movie and TV show data is fetched from [TMDB](https://www.themoviedb.org/).
-- Streaming sources are retrieved from various APIs.
-- I do **not** own, host, or distribute any of the content shown in this app.
-- This project is **not intended for commercial use** and should not be used to access copyrighted material illegally.
+Your application will be available at `http://localhost:5173`.
 
-If you enjoy a movie or TV show you discover here, please support the creators by watching through legitimate streaming platforms.
+## Building for Production
 
-## License
+Create a production build:
 
-This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
-Please note: while the code is free to use, it is provided **for educational purposes only**. You are solely responsible for ensuring your use complies with copyright laws in your region.
+```bash
+npm run build
+```
+
+## Deployment
+
+### Docker Deployment
+
+To build and run using Docker:
+
+```bash
+docker build -t my-app .
+
+# Run the container
+docker run -p 3000:3000 my-app
+```
+
+The containerized application can be deployed to any platform that supports Docker, including:
+
+- AWS ECS
+- Google Cloud Run
+- Azure Container Apps
+- Digital Ocean App Platform
+- Fly.io
+- Railway
+
+### DIY Deployment
+
+If you're familiar with deploying Node applications, the built-in app server is production-ready.
+
+Make sure to deploy the output of `npm run build`
+
+```
+├── package.json
+├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
+├── build/
+│   ├── client/    # Static assets
+│   └── server/    # Server-side code
+```
+
+## Styling
+
+This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+
+---
+
+Built with ❤️ using React Router.

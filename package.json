@@ -1,25 +1,30 @@
 {
   "name": "lumeo",
-  "version": "1.0.0",
-  "description": "Movie and TV Show Platform made using Node.js and Typescript",
-  "repository": {
-    "type": "git",
-    "url": "github.com/seifsheikhelarab/lumeo"
-  },
-  "license": "MIT",
-  "author": "seifsheikhelarab",
+  "private": true,
   "type": "module",
-  "main": "api/index.js",
   "scripts": {
-    "start": "node api/index.js",
-    "watch": "nodemon api/index.js"
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.2",
-    "ejs": "^3.1.10",
-    "express": "^5.1.0",
-    "morgan": "^1.10.1",
-    "nodemon": "^3.1.10"
+    "@react-router/node": "7.13.2",
+    "@react-router/serve": "7.13.2",
+    "isbot": "^5.1.36",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router": "7.13.2"
+  },
+  "devDependencies": {
+    "@react-router/dev": "7.13.2",
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/node": "^22",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.7",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }
