@@ -9,5 +9,7 @@ export default [
     route("tv", "routes/tv/tv.tsx"),
     route("tv/:id", "routes/tv/tv.$id.tsx"),
     route("tv/:id/season/:season/episode/:episode", "routes/tv/tv.$id.season.$season.episode.$episode.tsx"),
+    route("together", "routes/together/together.tsx"),
+    route("together/:roomId", "routes/together/together.$roomId.tsx"),
   ]),
 ] satisfies RouteConfig;

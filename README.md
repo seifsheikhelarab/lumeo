@@ -1,87 +1,87 @@
-# Welcome to React Router!
+<div align="center">
+  <img src="/lumeo/public/favicon.ico" alt="Lumeo Logo" width="80" height="80" />
+  <h1>Lumeo</h1>
+  <p>A cinematic, content-first streaming discovery platform.</p>
+</div>
 
-A modern, production-ready template for building full-stack React applications using React Router.
+---
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+Lumeo is a modern streaming discovery application built with **React Router 7**, **React 19**, and **TailwindCSS 4**. It provides a refined, theater-like experience for browsing movies and TV shows, with features like real-time search, watch-together rooms, and detailed content information powered by TMDB.
+
+> [!IMPORTANT]
+> This project is for educational and personal use only. It demonstrates modern web development patterns and integrations with external content providers.
 
 ## Features
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- **Cinematic Discovery**: Browse trending movies and TV shows with a focus on high-quality posters and metadata.
+- **Detailed Information**: View comprehensive details including cast, seasons, episodes, and similar content.
+- **Watch Together**: Real-time synchronized watch rooms using Socket.IO.
+- **Responsive Design**: Optimized for a seamless experience across mobile, tablet, and desktop devices.
+- **Refined UI**: A dark-mode primary interface with smooth transitions and purposeful animations.
+
+## Tech Stack
+
+- **Framework**: [React Router 7](https://reactrouter.com/) (formerly Remix)
+- **Library**: [React 19](https://react.dev/)
+- **Styling**: [TailwindCSS 4](https://tailwindcss.com/)
+- **Typography**: [Outfit](https://fonts.google.com/specimen/Outfit)
+- **Data Provider**: [TMDB API](https://www.themoviedb.org/documentation/api)
+- **Real-time**: [Socket.IO](https://socket.io/)
 
 ## Getting Started
 
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v20 or higher recommended)
+- [TMDB API Key](https://www.themoviedb.org/settings/api) (Read Access Token)
+
 ### Installation
 
-Install the dependencies:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/lumeo-app.git
+   cd lumeo-app/lumeo
+   ```
 
-```bash
-npm install
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Configure environment variables:
+   Create a `.env` file in the `lumeo` directory and add your TMDB token:
+   ```env
+   VITE_TMDB_TOKEN=your_tmdb_read_access_token_here
+   ```
 
 ### Development
 
-Start the development server with HMR:
-
+Run the development server:
 ```bash
 npm run dev
 ```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-Your application will be available at `http://localhost:5173`.
+## Project Structure
 
-## Building for Production
+```text
+app/
+├── components/     # Reusable UI components
+├── routes/         # Page components and routing logic
+├── services/       # API and external service integrations
+├── types/          # TypeScript definitions
+├── root.tsx        # Application root and global layout
+└── routes.ts       # Route configuration
+```
 
-Create a production build:
+## Production
 
+Build the application:
 ```bash
 npm run build
 ```
 
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
+Start the production server:
 ```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+npm run start
 ```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
