@@ -1,59 +1,207 @@
-import { io, Socket } from "socket.io-client";
+import Ably from "ably";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || `http://localhost:5173`;
+const ABLY_AUTH_URL = import.meta.env.VITE_ABLY_AUTH_URL || "/api/ably-auth";
+const ROOM_API_URL = "/api/room";
 
-let socket: Socket | null = null;
+let realtime: Ably.Realtime | null = null;
+let channel: Ably.RealtimeChannel | null = null;
 
-export function getSocket(): Socket {
-  if (!socket) {
-    socket = io(SOCKET_URL, {
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
-    console.log("Socket created, connecting to:", SOCKET_URL);
-  }
-  return socket;
+interface AblySocket {
+  emit: (event: string, data: unknown) => void;
+  once: <T = unknown>(event: string, callback: (data: T) => void) => void;
+  on: <T = unknown>(event: string, callback: (data: T) => void) => void;
+  off: (event: string) => void;
+  disconnect: () => void;
+  connect: (channelName: string) => Promise<void>;
+  connected: boolean;
 }
 
-export function connectSocket(): Promise<Socket> {
-  return new Promise((resolve, reject) => {
-    const s = getSocket();
-    if (s.connected) {
-      resolve(s);
+class AblySocketAdapter implements AblySocket {
+  private listeners: Map<string, Set<(msg: Ably.InboundMessage) => void>> = new Map();
+  private _connected = false;
+
+  get connected(): boolean {
+    return this._connected;
+  }
+
+  async connect(channelName: string): Promise<void> {
+    if (!realtime) {
+      realtime = new Ably.Realtime({
+        authUrl: ABLY_AUTH_URL,
+        authMethod: "POST",
+      });
+    }
+
+    const state = realtime!.connection.state;
+    console.log(`[Socket] Connection state: ${state}`);
+    
+    if (state === "connected") {
+      channel = realtime!.channels.get(channelName);
+      this._connected = true;
       return;
     }
 
-    const timeout = setTimeout(() => {
-      s.off("connect", onConnect);
-      s.off("connect_error", onError);
-      reject(new Error("Connection timed out"));
-    }, 10000);
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        if (realtime!.connection.state !== "connected") {
+          reject(new Error(`Ably connection timed out (state: ${realtime!.connection.state})`));
+        }
+      }, 15000);
 
-    const onConnect = () => {
-      clearTimeout(timeout);
-      s.off("connect_error", onError);
-      console.log("Socket connected!");
-      resolve(s);
+      const cleanup = () => {
+        clearTimeout(timeout);
+        realtime!.connection.off(onConnected);
+        realtime!.connection.off(onFailed);
+      };
+
+      const onConnected = () => {
+        cleanup();
+        this._connected = true;
+        channel = realtime!.channels.get(channelName);
+        console.log("[Socket] Ably connected!");
+        resolve();
+      };
+
+      const onFailed = (err: any) => {
+        cleanup();
+        console.error("[Socket] Ably connection failed:", err);
+        reject(err);
+      };
+
+      realtime!.connection.on("connected", onConnected);
+      realtime!.connection.on("failed", onFailed);
+
+      if (state === "initialized" || state === "disconnected" || state === "suspended") {
+        realtime!.connection.connect();
+      }
+    });
+  }
+
+  emit(event: string, data: unknown): void {
+    if (channel) {
+      channel.publish(event, data);
+    }
+  }
+
+  once<T = unknown>(event: string, callback: (data: T) => void): void {
+    const wrapper = (msg: Ably.InboundMessage) => {
+      this.off(event);
+      callback(msg.data as T);
+    };
+    this.on(event, wrapper as any);
+  }
+
+  on<T = unknown>(event: string, callback: (data: T) => void): void {
+    if (!channel) return;
+    
+    const ablyCallback = (msg: Ably.InboundMessage) => {
+      callback(msg.data as T);
     };
 
-    const onError = (err: Error) => {
-      clearTimeout(timeout);
-      s.off("connect", onConnect);
-      console.error("Socket connection error:", err);
-      reject(err);
-    };
+    // Store the Ably callback so we can unsubscribe it later
+    const wrappers = this.listeners.get(event) || new Set();
+    wrappers.add(ablyCallback);
+    this.listeners.set(event, wrappers);
 
-    s.once("connect", onConnect);
-    s.once("connect_error", onError);
-    s.connect();
+    channel.subscribe(event, ablyCallback);
+  }
+
+  off(event: string): void {
+    if (channel) {
+      const wrappers = this.listeners.get(event);
+      if (wrappers) {
+        wrappers.forEach(cb => channel!.unsubscribe(event, cb));
+      }
+    }
+    this.listeners.delete(event);
+  }
+
+  disconnect(): void {
+    if (realtime) {
+      realtime.close();
+      realtime = null;
+      channel = null;
+      this._connected = false;
+      this.listeners.clear();
+    }
+  }
+}
+
+let socketInstance: AblySocketAdapter | null = null;
+
+export function getSocket(): AblySocket {
+  if (!socketInstance) {
+    socketInstance = new AblySocketAdapter();
+  }
+  return socketInstance;
+}
+
+export async function connectSocket(roomId?: string): Promise<AblySocket> {
+  const s = getSocket() as AblySocketAdapter;
+  const channelName = roomId 
+    ? `room:${roomId}` 
+    : `watch-together:${import.meta.env.DEV ? "dev" : "prod"}`;
+  await s.connect(channelName);
+  return s;
+}
+
+export async function createRoom(params: {
+  contentId: string;
+  contentType: "movie" | "episode";
+  userName: string;
+  season?: string;
+  episode?: string;
+}): Promise<RoomState> {
+  const response = await fetch(ROOM_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "create-room", ...params }),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to create room");
+  }
+  
+  return response.json();
+}
+
+export async function joinRoom(params: {
+  roomId: string;
+  userName: string;
+  participantId: string;
+}): Promise<RoomState> {
+  const response = await fetch(ROOM_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "join-room", ...params }),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to join room");
+  }
+  
+  return response.json();
+}
+
+export async function updateRoom(params: {
+  roomId: string;
+  isStarted?: boolean;
+  server?: string;
+  hostId: string;
+}): Promise<void> {
+  await fetch(ROOM_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "update-room", ...params }),
   });
 }
 
 export function disconnectSocket(): void {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
+  if (socketInstance) {
+    socketInstance.disconnect();
+    socketInstance = null;
   }
 }
 

@@ -12,9 +12,9 @@ export function ParticipantList({ participants, currentUserId }: ParticipantList
         Participants ({participants.length}/5)
       </h3>
       <ul className="space-y-2">
-        {participants.map((participant) => (
+        {participants.map((participant, idx) => (
           <li
-            key={participant.id}
+            key={participant.id || `part-${idx}`}
             className="flex items-center gap-3 text-zinc-200"
           >
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-medium">

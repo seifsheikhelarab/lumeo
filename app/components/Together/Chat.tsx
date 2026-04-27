@@ -29,10 +29,10 @@ export function Chat({ messages, onSendMessage }: ChatProps) {
             No messages yet. Say hi!
           </p>
         ) : (
-          messages.map((msg) => (
-            <div key={msg.id} className="text-sm">
-              <span className="font-medium text-indigo-400">{msg.userName}: </span>
-              <span className="text-zinc-300">{msg.message}</span>
+          messages.map((msg, idx) => (
+            <div key={msg.id || `msg-${idx}`} className="text-sm bg-zinc-800/50 p-2 rounded-lg border border-zinc-700/30">
+              <span className="font-bold text-indigo-400">{msg.userName || "Anonymous"}: </span>
+              <span className="text-zinc-200 break-words">{msg.message}</span>
             </div>
           ))
         )}

@@ -1,6 +1,8 @@
-import { type RouteConfig, index, route, layout } from "@react-router/dev/routes";
+import { type RouteConfig, index, route, layout, prefix } from "@react-router/dev/routes";
 
 export default [
+  route("api/ably-auth", "routes/api/ably-auth.tsx"),
+  route("api/room", "routes/api/room.tsx"),
   layout("routes/layout.tsx", [
     index("routes/home.tsx"),
     route("movies", "routes/movies/movies.tsx"),

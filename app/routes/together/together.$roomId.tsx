@@ -1,10 +1,13 @@
 import { Link, useLoaderData } from "react-router";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useId } from "react";
 import { useParams, useNavigate, useLocation } from "react-router";
 import {
   connectSocket,
   disconnectSocket,
   getSocket,
+  createRoom,
+  joinRoom,
+  updateRoom,
   type RoomState,
   type ChatMessage,
   type Participant,
@@ -55,8 +58,31 @@ export default function TogetherRoom() {
   const [playbackUpdatedBy, setPlaybackUpdatedBy] = useState<string | undefined>();
   const lastSyncEmitRef = useRef(0);
   const syncPendingRef = useRef(false);
+  const playbackTimeRef = useRef(0);
   const isReconnectingRef = useRef(false);
+
+  // Keep ref in sync for the interval
+  useEffect(() => {
+    playbackTimeRef.current = playbackTime;
+  }, [playbackTime]);
+
+  // Periodic sync for host
+  useEffect(() => {
+    if (!roomState?.isHost || !roomState?.isStarted || !isPlaying) return;
+
+    const interval = setInterval(() => {
+      getSocket().emit("playback-update", {
+        roomId: roomState.roomId,
+        currentTime: playbackTimeRef.current,
+        isPlaying: true,
+        updatedBy: roomState.participant.name
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [roomState?.isHost, roomState?.isStarted, isPlaying, roomState?.roomId, roomState?.participant.name]);
   const lastPlaybackStateRef = useRef({ time: 0, playing: false });
+  const participantIdRef = useRef(useId());
 
   const isCreateMode = roomId === "CREATE";
   const isJoinMode = roomId && roomId.length === 6 && roomId !== "CREATE";
@@ -68,38 +94,19 @@ export default function TogetherRoom() {
     console.log("Connecting to socket server...");
     
     try {
-      const socket = await connectSocket();
+      const socket = await connectSocket(isJoinMode ? roomId : undefined);
       console.log("Socket connected, setting up listeners...");
 
-      socket.once("room-created", (data: RoomState) => {
-        console.log("Room created:", data);
-        setRoomState(data);
-        setIsConnecting(false);
-        setShowNameModal(false);
-        const query = new URLSearchParams({
-          contentId: data.contentId,
-          contentType: data.contentType,
-          ...(data.season ? { season: data.season } : {}),
-          ...(data.episode ? { episode: data.episode } : {}),
-        }).toString();
-        navigate(`/together/${data.roomId}?${query}`, { replace: true });
-      });
-
-      socket.once("room-joined", (data: RoomState) => {
-        console.log("Room joined:", data);
-        setRoomState(data);
-        setIsConnecting(false);
-        setShowNameModal(false);
-      });
-
-      socket.once("error", (data: { message: string }) => {
-        console.error("Room error:", data);
-        setError(data.message);
-        setIsConnecting(false);
-      });
-
       if (isJoinMode) {
-        socket.emit("join-room", { roomId, userName: userName.trim() });
+        const roomState = await joinRoom({
+          roomId: roomId,
+          userName: userName.trim(),
+          participantId: participantIdRef.current,
+        });
+        console.log("Room joined:", roomState);
+        setRoomState(roomState);
+        setIsConnecting(false);
+        setShowNameModal(false);
       } else {
         const params = new URLSearchParams(window.location.search);
         const contentId = params.get("contentId") || "";
@@ -108,17 +115,35 @@ export default function TogetherRoom() {
         const episode = params.get("episode") || undefined;
         const nameFromState = location.state?.userName || userName.trim();
         
-        socket.emit("create-room", {
+        const roomState = await createRoom({
           contentId,
           contentType,
           season,
           episode,
           userName: nameFromState,
         });
+        console.log("Room created:", roomState);
+        
+        // Re-connect to the specific room channel now that we have the ID
+        await connectSocket(roomState.roomId);
+        
+        setRoomState(roomState);
+        setIsConnecting(false);
+        setShowNameModal(false);
+        const query = new URLSearchParams({
+          contentId: roomState.contentId,
+          contentType: roomState.contentType,
+          ...(roomState.season ? { season: roomState.season } : {}),
+          ...(roomState.episode ? { episode: roomState.episode } : {}),
+        }).toString();
+        navigate(`/together/${roomState.roomId}?${query}`, { replace: true });
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Failed to connect:", err);
-      setError("Failed to connect to server");
+      const message = err instanceof Error && err.message.includes("not configured")
+        ? "Watch Together is not available in production. It requires a WebSocket server to be deployed separately."
+        : "Failed to connect to server";
+      setError(message);
       setIsConnecting(false);
     }
   }, [userName, roomId, isJoinMode, isCreateMode, navigate, location.state]);
@@ -155,14 +180,25 @@ export default function TogetherRoom() {
       );
     });
 
-    socket.on("chat-message", (message: ChatMessage) => {
-      setMessages((prev) => [...prev, message]);
+    socket.on("room-state", (data: { room: any }) => {
+      if (!data.room) return;
+      setRoomState((prev) =>
+        prev ? { 
+          ...prev, 
+          isStarted: data.room.isStarted, 
+          server: data.room.server,
+          participants: Array.from(Object.values(data.room.participants || {})) as Participant[]
+        } : null
+      );
     });
 
-    socket.on("room-updated", (data: { isStarted: boolean; server: string }) => {
-      setRoomState((prev) =>
-        prev ? { ...prev, isStarted: data.isStarted, server: data.server } : null
-      );
+    socket.on("chat-message", (message: ChatMessage) => {
+      if (!message.message || !message.userName) return;
+      setMessages((prev) => {
+        // Prevent duplicate messages if Ably echoes
+        if (prev.some(m => m.id === message.id)) return prev;
+        return [...prev, message];
+      });
     });
 
     socket.on("playback-update", (data: PlaybackUpdate) => {
@@ -172,7 +208,7 @@ export default function TogetherRoom() {
     });
 
     socket.on("sync-response", (data: { currentTime: number; isPlaying: boolean }) => {
-      if (!roomState?.isHost) return;
+      if (roomState?.isHost) return;
       setIsPlaying(data.isPlaying);
       setPlaybackTime(data.currentTime);
     });
@@ -186,12 +222,8 @@ export default function TogetherRoom() {
       });
     });
 
-    socket.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
-      if (reason === "io server disconnect" || reason === "transport close") {
-        isReconnectingRef.current = true;
-        socket.connect();
-      }
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
     });
 
     socket.on("connect", () => {
@@ -254,29 +286,46 @@ export default function TogetherRoom() {
 
   const handleSendMessage = (message: string) => {
     if (roomState) {
-      getSocket().emit("chat-message", { roomId: roomState.roomId, message });
+      getSocket().emit("chat-message", { 
+        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        roomId: roomState.roomId, 
+        message,
+        userName: roomState.participant.name,
+        userId: roomState.participant.id,
+        timestamp: new Date().toISOString()
+      });
     }
   };
 
   const handleUpdateRoom = (updates: { isStarted?: boolean; server?: string }) => {
     if (roomState?.isHost) {
-      getSocket().emit("update-room", { roomId: roomState.roomId, ...updates });
+      updateRoom({ 
+        roomId: roomState.roomId, 
+        hostId: roomState.participant.id,
+        ...updates 
+      });
     }
   };
 
   const emitPlaybackSync = useCallback((videoTime: number, playing: boolean) => {
     const now = Date.now();
-    if (now - lastSyncEmitRef.current < 200) return;
-    lastSyncEmitRef.current = now;
+    const isThrottled = now - lastSyncEmitRef.current < 300;
+    
+    // Always reset pending state so next action can try
     syncPendingRef.current = false;
 
+    if (isThrottled) return;
+    
+    lastSyncEmitRef.current = now;
     setIsPlaying(playing);
     setPlaybackTime(videoTime);
     setPlaybackUpdatedBy(roomState?.participant.name);
-    getSocket().emit("playback-sync", {
+    
+    getSocket().emit("playback-update", {
       roomId: roomState?.roomId,
       currentTime: videoTime,
       isPlaying: playing,
+      updatedBy: roomState?.participant.name
     });
   }, [roomState]);
 
@@ -421,6 +470,7 @@ export default function TogetherRoom() {
               playbackUpdatedBy={playbackUpdatedBy}
               onPlayPause={handlePlayPause}
               onSeek={handleSeek}
+              onTimeUpdate={(time) => roomState?.isHost && setPlaybackTime(time)}
               onSyncRequest={handleSyncRequest}
             />
             

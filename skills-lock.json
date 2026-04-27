@@ -115,6 +115,11 @@
       "source": "pbakaus/impeccable",
       "sourceType": "github",
       "computedHash": "146bb7705cf1a4439b2195baac5628f80bbc39ab4f06cd9415fec466da0a52cb"
+    },
+    "using-ably": {
+      "source": "ably/agent-skills",
+      "sourceType": "github",
+      "computedHash": "ae7262541f28c51034117dffa79e90b451f2db5a0920a0da11bc7873383ffcc6"
     }
   }
 }

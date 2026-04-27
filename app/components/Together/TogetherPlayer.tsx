@@ -1,5 +1,5 @@
-import { useEffect, useRef, useCallback, useState } from "react";
-import { getMovieEmbedUrl, getTVEmbedUrl } from "~/services/api";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
+import { getMovieEmbedUrl, getTVEmbedUrl, STREAMING_SERVERS } from "~/services/api";
 
 const VIDFAST_ORIGINS = [
   "https://vidfast.pro",
@@ -9,12 +9,15 @@ const VIDFAST_ORIGINS = [
   "https://vidfast.net",
   "https://vidfast.pm",
   "https://vidfast.xyz",
+  "https://vidfast.org",
+  "https://vidfast.cc",
+  "https://vidfast.to",
 ];
 
-const SYNC_THRESHOLD = 2;
-const BLOCK_DURATION = 800;
-const SYNC_CHECK_INTERVAL = 10000;
-const MAX_DRIFT_ALLOWED = 5;
+const SYNC_THRESHOLD = 3.5; // More relaxed to allow for network jitter
+const BLOCK_DURATION = 2000; // Longer block to ensure player settles
+const SYNC_CHECK_INTERVAL = 3000; // Check more often
+const MAX_DRIFT_ALLOWED = 5; // Allow more drift before hard-syncing
 
 interface TogetherPlayerProps {
   contentId: string;
@@ -29,6 +32,7 @@ interface TogetherPlayerProps {
   playbackUpdatedBy?: string;
   onPlayPause?: (isPlaying: boolean, currentTime: number) => void;
   onSeek?: (currentTime: number) => void;
+  onTimeUpdate?: (time: number) => void;
   onSyncRequest?: () => void;
 }
 
@@ -45,19 +49,41 @@ export function TogetherPlayer({
   playbackUpdatedBy,
   onPlayPause,
   onSeek,
+  onTimeUpdate,
   onSyncRequest,
 }: TogetherPlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const lastTimeRef = useRef(0);
   const blockedUntilRef = useRef(0);
   const lastHostUpdateRef = useRef(0);
-  const isRemoteUpdateRef = useRef(false);
   const [localPlayerReady, setLocalPlayerReady] = useState(false);
+  const [localIsPlaying, setLocalIsPlaying] = useState(false);
+  const [localTime, setLocalTime] = useState(0);
   const syncCheckIntervalRef = useRef<number | null>(null);
+
+  const allowedOrigins = useMemo(() => {
+    const currentServer = STREAMING_SERVERS.find(s => s.id === server);
+    const origins = [...VIDFAST_ORIGINS];
+    if (currentServer) {
+      try {
+        const origin = new URL(currentServer.baseUrl).origin;
+        if (!origins.includes(origin)) {
+          origins.push(origin);
+        }
+      } catch (e) {
+        // Ignore invalid URLs
+      }
+    }
+    return origins;
+  }, [server]);
 
   const send = useCallback((msg: Record<string, unknown>) => {
     if (iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(msg, "*");
+      // Most players accept objects, but we'll try stringify as a fallback for older players
+      // but only one message per command to avoid double-processing
+      const target = iframeRef.current.contentWindow;
+      target.postMessage(msg, "*");
+      // If we know a player specifically needs strings, we'd handle it here
     }
   }, []);
 
@@ -71,7 +97,13 @@ export function TogetherPlayer({
     
     blockedUntilRef.current = now + BLOCK_DURATION;
     lastTimeRef.current = currentTime;
-    send({ command: isPlaying ? "play" : "pause" });
+    
+    send({ 
+      command: isPlaying ? "play" : "pause",
+      time: currentTime 
+    });
+    
+    // Always seek if it's a significant drift, even if playing/pausing
     if (Math.abs(currentTime - lastTimeRef.current) > SYNC_THRESHOLD) {
       send({ command: "seek", time: currentTime });
     }
@@ -81,69 +113,107 @@ export function TogetherPlayer({
     if (!isStarted) return;
 
     const handler = (e: MessageEvent) => {
-      if (!VIDFAST_ORIGINS.includes(e.origin)) return;
-      if (e.data?.type !== "PLAYER_EVENT") return;
+      // Check if it's a valid VidFast origin
+      const isValidOrigin = allowedOrigins.some(origin => e.origin === origin);
+      if (!isValidOrigin) return;
 
-      const ev = e.data.data?.event;
-      const t = e.data.data?.currentTime;
+      // Log raw data for debugging
+      console.log("[Player Event]", e.origin, e.data);
 
-      if (ev === "playerstatus") {
+      let eventType = "";
+      let eventTime = 0;
+
+      // Handle different possible event structures
+      if (e.data?.type === "PLAYER_EVENT") {
+        eventType = e.data.data?.event || "";
+        eventTime = e.data.data?.currentTime || 0;
+      } else if (e.data?.event) {
+        eventType = e.data.event;
+        eventTime = e.data.currentTime || e.data.time || 0;
+      } else if (typeof e.data === "string" && (e.data.includes("{") || e.data.includes("["))) {
+        try {
+          const parsed = JSON.parse(e.data);
+          eventType = parsed.event || parsed.type || "";
+          eventTime = parsed.currentTime || parsed.time || 0;
+        } catch (err) {
+          // Not JSON or not our format
+        }
+      }
+
+      // If we got ANY valid message from a valid origin, the player is alive
+      if (!localPlayerReady) {
         setLocalPlayerReady(true);
-        if (!isHost && Math.abs(t - currentTime) > MAX_DRIFT_ALLOWED && Date.now() - lastHostUpdateRef.current > 2000) {
+      }
+
+      if (!eventType) return;
+
+      if (eventType === "playerstatus" || eventType === "ready" || eventType === "loaded") {
+        setLocalPlayerReady(true);
+        // Sync if drift is too high
+        if (!isHost && (Math.abs(eventTime - currentTime) > MAX_DRIFT_ALLOWED)) {
           onSyncRequest?.();
         }
         return;
       }
 
-      const now = Date.now();
-      if (now < blockedUntilRef.current) return;
-
-      if (ev === "play") {
-        isRemoteUpdateRef.current = true;
-        onPlayPause?.(true, t ?? 0);
-        setTimeout(() => { isRemoteUpdateRef.current = false; }, 100);
-      } else if (ev === "pause") {
-        isRemoteUpdateRef.current = true;
-        onPlayPause?.(false, t ?? 0);
-        setTimeout(() => { isRemoteUpdateRef.current = false; }, 100);
-      } else if (ev === "seeked") {
-        isRemoteUpdateRef.current = true;
-        onSeek?.(t ?? 0);
-        setTimeout(() => { isRemoteUpdateRef.current = false; }, 100);
+      if (eventType === "play") {
+        setLocalIsPlaying(true);
+        if (isHost) {
+          onPlayPause?.(true, eventTime);
+        }
+      } else if (eventType === "pause") {
+        setLocalIsPlaying(false);
+        if (isHost) {
+          onPlayPause?.(false, eventTime);
+        }
+      } else if (eventType === "seeked" || eventType === "seek") {
+        setLocalTime(eventTime);
+        if (isHost) {
+          onSeek?.(eventTime);
+        }
+      } else if (eventTime) {
+        setLocalTime(eventTime);
+        if (isHost) {
+          onTimeUpdate?.(eventTime);
+        }
       }
     };
 
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [isStarted, onPlayPause, onSeek, onSyncRequest, currentTime, isHost]);
+  }, [isStarted, onPlayPause, onSeek, onTimeUpdate, onSyncRequest, currentTime, isHost, localPlayerReady, allowedOrigins]);
 
   useEffect(() => {
-    if (!isStarted) return;
+    if (!isStarted || !localPlayerReady || isHost) return;
 
     const now = Date.now();
     if (now < blockedUntilRef.current) return;
 
-    if (!isHost && isRemoteUpdateRef.current) return;
-
-    blockedUntilRef.current = now + BLOCK_DURATION;
-    send({ command: isPlaying ? "play" : "pause" });
-  }, [isStarted, isPlaying, send, isHost]);
+    // Only sync if state differs
+    if (isPlaying !== localIsPlaying) {
+      console.log(`[Sync] Mismatch detected: host playing=${isPlaying}, local playing=${localIsPlaying}`);
+      blockedUntilRef.current = now + BLOCK_DURATION;
+      send({ 
+        command: isPlaying ? "play" : "pause",
+        time: currentTime 
+      });
+    }
+  }, [isStarted, isPlaying, isHost, localPlayerReady, localIsPlaying, send, currentTime]);
 
   useEffect(() => {
-    if (!isStarted) return;
+    if (!isStarted || !localPlayerReady || isHost) return;
 
-    if (!isHost && isRemoteUpdateRef.current) return;
-
-    const drift = Math.abs(currentTime - lastTimeRef.current);
+    const drift = Math.abs(currentTime - localTime);
     if (drift < SYNC_THRESHOLD) return;
 
     const now = Date.now();
     if (now < blockedUntilRef.current) return;
 
+    console.log(`[Sync] Drift detected: host time=${currentTime}, local time=${localTime}, drift=${drift}`);
     blockedUntilRef.current = now + BLOCK_DURATION;
     lastTimeRef.current = currentTime;
     send({ command: "seek", time: currentTime });
-  }, [isStarted, currentTime, send, isHost]);
+  }, [isStarted, currentTime, isHost, localPlayerReady, localTime, send]);
 
   useEffect(() => {
     if (!isStarted) return;
