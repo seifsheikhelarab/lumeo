@@ -14,66 +14,45 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   return (
-    <div className="max-w-7xl mx-auto px-6 py-16">
-      <section className="text-center py-20 animate-fade-in">
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-transparent">
-          Welcome to Lumeo V2
-        </h1>
-        <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-          Your unified interface to discover and watch movies & TV shows
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            to="/movies"
-            className="inline-flex items-center justify-center px-8 py-3 bg-white text-zinc-900 font-medium rounded-lg hover:scale-105 hover:bg-zinc-200 transition-all duration-200"
-          >
-            Browse Movies
-          </Link>
-          <Link
-            to="/tv"
-            className="inline-flex items-center justify-center px-8 py-3 bg-zinc-800 text-white font-medium rounded-lg hover:scale-105 hover:bg-zinc-700 transition-all duration-200"
-          >
-            Browse TV Shows
-          </Link>
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col">
+      <div className="flex-1 flex items-center">
+        <div className="max-w-7xl mx-auto px-6 py-24 w-full">
+          <div className="max-w-2xl">
+            <p className="text-sm uppercase tracking-widest text-zinc-500 mb-4 animate-fade-in-up" style={{ animationDelay: "0ms" }}>
+              Streaming Interface
+            </p>
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.05] animate-fade-in-up" style={{ animationDelay: "100ms", fontFamily: 'var(--font-display)' }}>
+              Lumeo
+            </h1>
+            <p className="text-xl text-zinc-400 mb-10 leading-relaxed animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+              Discover and watch movies & TV shows with an interface built for content, not clutter.
+            </p>
+            <div className="flex gap-4 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+              <Link
+                to="/movies"
+                className="px-6 py-3 bg-white text-zinc-900 font-medium rounded-lg hover:bg-zinc-100 hover:scale-105 active:scale-95 transition-all duration-200"
+              >
+                Browse Movies
+              </Link>
+              <Link
+                to="/tv"
+                className="px-6 py-3 text-zinc-300 font-medium rounded-lg border border-zinc-700 hover:bg-zinc-800 hover:scale-105 active:scale-95 transition-all duration-200"
+              >
+                TV Shows
+              </Link>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <section className="grid md:grid-cols-3 gap-8 py-16">
-        <div className="p-6 rounded-2xl bg-zinc-900/50 border border-white/5 hover:border-amber-500/30 transition-colors duration-300">
-          <div className="text-3xl mb-4">⚡</div>
-          <h3 className="text-lg font-semibold mb-2">Fast and Lightweight</h3>
-          <p className="text-zinc-400">
-            Built with a focus on performance and ease of use.
+      <footer className="border-t border-zinc-800">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <p className="text-xs text-zinc-600 max-w-xl leading-relaxed">
+            Educational project. Content from TMDB. Streaming sources from external APIs.
+            Do not use for unauthorized access to copyrighted material.
           </p>
         </div>
-        <div className="p-6 rounded-2xl bg-zinc-900/50 border border-white/5 hover:border-amber-500/30 transition-colors duration-300">
-          <div className="text-3xl mb-4">🔥</div>
-          <h3 className="text-lg font-semibold mb-2">Trending Now</h3>
-          <p className="text-zinc-400">
-            Stay up-to-date with the latest releases and popular picks.
-          </p>
-        </div>
-        <div className="p-6 rounded-2xl bg-zinc-900/50 border border-white/5 hover:border-amber-500/30 transition-colors duration-300">
-          <div className="text-3xl mb-4">🔍</div>
-          <h3 className="text-lg font-semibold mb-2">Seamless Search</h3>
-          <p className="text-zinc-400">
-            Find movies and series instantly with smart search.
-          </p>
-        </div>
-      </section>
-
-      <section className="mt-16 p-6 rounded-2xl bg-amber-950/20 border border-amber-500/20">
-        <p className="text-sm text-amber-200/70 text-center leading-relaxed">
-          This project is created strictly for educational and personal learning
-          purposes only. All movie and TV show data is fetched from TMDB. Streaming
-          sources are retrieved from various External APIs. I do not own, host, or
-          distribute any of the content shown in this app. This project is not
-          intended for commercial use and should not be used to access copyrighted
-          material illegally. If you enjoy a movie or TV show you discover here,
-          please support the creators by watching through legitimate streaming
-          platforms.
-        </p>
-      </section>
+      </footer>
     </div>
   );
 }

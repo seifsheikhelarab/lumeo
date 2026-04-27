@@ -4,15 +4,38 @@
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Type Scale - 1.25 ratio */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.563rem;
+  --text-3xl: 1.953rem;
+  --text-4xl: 2.441rem;
+  --text-5xl: 3.052rem;
+  
+  /* Line Heights */
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
 }
 
 html,
 body {
   @apply bg-zinc-950 text-zinc-100;
   color-scheme: dark;
+  font-family: var(--font-sans);
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -69,6 +92,26 @@ body {
   }
 }
 
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.4s var(--ease-out-quart) forwards;
 }
@@ -82,8 +125,27 @@ body {
   animation: slideIn 0.4s var(--ease-out-quart) forwards;
 }
 
+.animate-scale-in {
+  animation: scaleIn 0.3s var(--ease-out-expo) forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 1.5s linear infinite;
+}
+
 ::selection {
-  background-color: theme('colors.amber.500');
+  background-color: theme('colors.zinc.200');
   color: theme('colors.zinc.900');
 }
 
@@ -116,7 +178,9 @@ a {
   
   .animate-fade-in,
   .animate-fade-in-up,
-  .animate-slide-in {
+  .animate-slide-in,
+  .animate-scale-in,
+  .animate-shimmer {
     opacity: 1;
     transform: none;
     animation: none;

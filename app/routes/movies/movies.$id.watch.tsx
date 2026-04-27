@@ -1,27 +1,38 @@
 import { Link, useLoaderData } from "react-router";
 import { useState } from "react";
 import type { Route } from "./+types/movies.$id.watch";
-import { getMovieEmbedUrl, STREAMING_SERVERS } from "~/services/api";
+import { getMovieEmbedUrl, getMovie, STREAMING_SERVERS } from "~/services/api";
 
 export async function loader({ params }: Route.LoaderArgs) {
-  return { id: params.id };
+  let title = "Movie";
+  try {
+    const movie = await getMovie(params.id!);
+    title = movie.title || "Movie";
+  } catch (e) {
+    console.error("Failed to load movie:", e);
+  }
+  return { id: params.id, title };
 }
 
-export function meta() {
+export function meta({ data }: Route.MetaArgs) {
   return [
-    { title: "Watch Movie - Lumeo" },
+    { title: `Watch ${data?.title || "Movie"} - Lumeo` },
     { name: "description", content: "Watch movies streaming online free" },
   ];
 }
 
 export default function MovieWatch() {
-  const { id } = useLoaderData<typeof loader>();
-  const [server, setServer] = useState("moviesapi");
+  const { id, title } = useLoaderData<typeof loader>();
+  const [server, setServer] = useState("vidfast");
   const embedUrl = getMovieEmbedUrl(id!, server);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in">
-      <h1 className="text-2xl font-bold mb-6 text-center">Enjoy watching!</h1>
+      <div className="mb-6">
+        <Link to={`/movies/${id}`} className="text-zinc-500 hover:text-zinc-300 text-sm">
+          ← {title}
+        </Link>
+      </div>
 
       <div className="aspect-video bg-zinc-900 rounded-lg overflow-hidden mb-6 shadow-2xl">
         <iframe
@@ -40,7 +51,7 @@ export default function MovieWatch() {
             id="server-select"
             value={server}
             onChange={(e) => setServer(e.target.value)}
-            className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+            className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
           >
             {STREAMING_SERVERS.map((s) => (
               <option key={s.id} value={s.id}>

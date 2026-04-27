@@ -13,6 +13,8 @@ export default function TogetherCreate() {
   const navigate = useNavigate();
   const contentId = searchParams.get("contentId");
   const contentType = searchParams.get("contentType");
+  const season = searchParams.get("season");
+  const episode = searchParams.get("episode");
   const [userName, setUserName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
@@ -21,7 +23,10 @@ export default function TogetherCreate() {
     setIsCreating(true);
 
     const tempRoomId = "CREATE";
-    const url = `/together/${tempRoomId}?contentId=${contentId}&contentType=${contentType}`;
+    const params = new URLSearchParams({ contentId: contentId || "", contentType: contentType || "" });
+    if (season) params.set("season", season);
+    if (episode) params.set("episode", episode);
+    const url = `/together/${tempRoomId}?${params.toString()}`;
     navigate(url, { state: { userName: userName.trim(), isCreating: true } });
   };
 

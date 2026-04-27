@@ -1,4 +1,4 @@
-import type { Movie, TVShow, MovieSearchResult, TVSearchResult } from "~/types";
+import type { Movie, TVShow, MovieSearchResult, TVSearchResult, SeasonDetails } from "~/types";
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN;
@@ -56,24 +56,29 @@ export async function getTVShow(id: string): Promise<TVShow> {
   return handleResponse(res);
 }
 
+export async function getTVSeason(tvId: string, seasonNumber: number): Promise<SeasonDetails> {
+  const res = await fetch(`${TMDB_BASE_URL}/tv/${tvId}/season/${seasonNumber}?language=en-US`, { headers });
+  return handleResponse(res);
+}
+
 export function getImageUrl(path: string | null, size: string = "original"): string {
   if (!path) return "/img/noPoster.png";
   return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
 export const STREAMING_SERVERS = [
-  { id: "moviesapi", name: "Server 1", baseUrl: "https://moviesapi.to" },
-  { id: "vidfast", name: "Server 2", baseUrl: "https://vidfast.pro" },
+  { id: "vidfast", name: "Server 1", baseUrl: "https://vidfast.pro" },
+  { id: "moviesapi", name: "Server 2", baseUrl: "https://moviesapi.to" },
   { id: "pstream", name: "Server 3", baseUrl: "https://iframe.pstream.org" },
   { id: "rivestream", name: "Server 4", baseUrl: "https://rivestream.org" },
   { id: "videasy", name: "Server 5", baseUrl: "https://player.videasy.net" },
 ];
 
-export function getMovieEmbedUrl(id: string, server: string = "moviesapi"): string {
+export function getMovieEmbedUrl(id: string, server: string = "vidfast"): string {
   switch (server) {
-    case "moviesapi":
-      return `${STREAMING_SERVERS[0].baseUrl}/movie/${id}`;
     case "vidfast":
+      return `${STREAMING_SERVERS[0].baseUrl}/movie/${id}`;
+    case "moviesapi":
       return `${STREAMING_SERVERS[1].baseUrl}/movie/${id}`;
     case "pstream":
       return `${STREAMING_SERVERS[2].baseUrl}/embed/tmdb-movie-${id}`;
@@ -86,12 +91,12 @@ export function getMovieEmbedUrl(id: string, server: string = "moviesapi"): stri
   }
 }
 
-export function getTVEmbedUrl(id: string, season: string, episode: string, server: string = "moviesapi"): string {
+export function getTVEmbedUrl(id: string, season: string, episode: string, server: string = "vidfast"): string {
   switch (server) {
-    case "moviesapi":
-      return `${STREAMING_SERVERS[0].baseUrl}/tv/${id}-${season}-${episode}`;
     case "vidfast":
-      return `${STREAMING_SERVERS[1].baseUrl}/tv/${id}/${season}/${episode}`;
+      return `${STREAMING_SERVERS[0].baseUrl}/tv/${id}/${season}/${episode}`;
+    case "moviesapi":
+      return `${STREAMING_SERVERS[1].baseUrl}/tv/${id}-${season}-${episode}`;
     case "pstream":
       return `${STREAMING_SERVERS[2].baseUrl}/embed/tmdb-tv-${id}/${season}/${episode}`;
     case "rivestream":
@@ -99,6 +104,6 @@ export function getTVEmbedUrl(id: string, season: string, episode: string, serve
     case "videasy":
       return `${STREAMING_SERVERS[4].baseUrl}/tv/${id}/${season}/${episode}?nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true&color=8B5CF6&provider=Poseidon`;
     default:
-      return `${STREAMING_SERVERS[0].baseUrl}/tv/${id}-${season}-${episode}`;
+      return `${STREAMING_SERVERS[0].baseUrl}/tv/${id}/${season}/${episode}`;
   }
 }

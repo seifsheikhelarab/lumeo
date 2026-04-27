@@ -1,0 +1,74 @@
+{
+  "breakpoints": {
+    "375": {
+      "name": "movie-watch-btn",
+      "viewportWidth": 327,
+      "width": 327,
+      "height": 56,
+      "bones": [
+        [
+          0,
+          0,
+          53.5503,
+          56,
+          8,
+          true
+        ],
+        [
+          9.7859,
+          18,
+          6.1162,
+          20,
+          "50%"
+        ]
+      ]
+    },
+    "768": {
+      "name": "movie-watch-btn",
+      "viewportWidth": 400,
+      "width": 400,
+      "height": 56,
+      "bones": [
+        [
+          0,
+          0,
+          43.7773,
+          56,
+          8,
+          true
+        ],
+        [
+          8,
+          18,
+          5,
+          20,
+          "50%"
+        ]
+      ]
+    },
+    "1280": {
+      "name": "movie-watch-btn",
+      "viewportWidth": 864,
+      "width": 864,
+      "height": 56,
+      "bones": [
+        [
+          0,
+          0,
+          20.2673,
+          56,
+          8,
+          true
+        ],
+        [
+          3.7037,
+          18,
+          2.3148,
+          20,
+          "50%"
+        ]
+      ]
+    }
+  },
+  "_hash": "7c98b761e314a7ca014e30071465c8a7"
+}

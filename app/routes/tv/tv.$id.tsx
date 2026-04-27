@@ -1,8 +1,9 @@
 import { Link, useLoaderData, useRouteError, isRouteErrorResponse } from "react-router";
 import { useState } from "react";
 import type { Route } from "./+types/tv.$id";
-import { getTVShow, getImageUrl } from "~/services/api";
+import { getTVShow, getTVSeason, getImageUrl } from "~/services/api";
 import { ErrorDisplay, NotFound } from "~/components/UI/ErrorDisplay";
+import type { SeasonDetails } from "~/types";
 
 export async function loader({ params }: Route.LoaderArgs) {
   if (!params.id) {
@@ -35,108 +36,98 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
+function formatRuntime(minutes: number | null): string {
+  if (!minutes) return "";
+  if (minutes < 60) return `${minutes}m`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  try {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
 export default function TVDetails() {
   const { show } = useLoaderData<typeof loader>();
   const [openSeasons, setOpenSeasons] = useState<Record<number, boolean>>({});
+  const [seasonDetails, setSeasonDetails] = useState<Record<number, SeasonDetails | null>>({});
+  const [loadingSeasons, setLoadingSeasons] = useState<Record<number, boolean>>({});
 
-  const toggleSeason = (seasonNumber: number) => {
-    setOpenSeasons((prev) => ({
-      ...prev,
-      [seasonNumber]: !prev[seasonNumber],
-    }));
+  const toggleSeason = async (e: React.MouseEvent, seasonNumber: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isOpening = !openSeasons[seasonNumber];
+    setOpenSeasons((prev) => ({ ...prev, [seasonNumber]: isOpening }));
+    
+    if (isOpening && !seasonDetails[seasonNumber]) {
+      setLoadingSeasons((prev) => ({ ...prev, [seasonNumber]: true }));
+      try {
+        const details = await getTVSeason(String(show.id), seasonNumber);
+        setSeasonDetails((prev) => ({ ...prev, [seasonNumber]: details }));
+      } catch (err) {
+        console.error("Failed to load season:", err);
+      } finally {
+        setLoadingSeasons((prev) => ({ ...prev, [seasonNumber]: false }));
+      }
+    }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row gap-8 lg:gap-12 mb-16">
-        <div className="flex-shrink-0 w-full md:w-72 lg:w-80 mx-auto md:mx-0">
-          <div className="rounded-xl overflow-hidden bg-zinc-900 shadow-2xl">
-            <img
-              src={getImageUrl(show.poster_path, "w500")}
-              alt={`${show.name} poster`}
-              className="w-full h-auto"
-              width={400}
-              height={600}
-            />
-          </div>
+    <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="flex gap-8 mb-12 animate-fade-in-up" style={{ animationDelay: "0ms" }}>
+        <div className="flex-shrink-0 w-40">
+          <img
+            src={getImageUrl(show.poster_path, "w300")}
+            alt={`${show.name} poster`}
+            className="w-full rounded-lg"
+          />
         </div>
 
-        <div className="flex-1">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 animate-fade-in-up">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-bold text-zinc-100 mb-2">
             {show.name}
           </h1>
-          {show.tagline && (
-            <p className="text-lg md:text-xl text-zinc-400 italic mb-6 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-              {show.tagline}
+          <p className="text-sm text-zinc-500 mb-4">
+            {show.number_of_seasons} seasons · {show.number_of_episodes} episodes
+          </p>
+          {show.overview && (
+            <p className="text-sm text-zinc-400 leading-relaxed line-clamp-3">
+              {show.overview}
             </p>
           )}
-
-          <div className="flex flex-wrap gap-2 mb-6 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-            {show.genres.map((genre) => (
-              <span
-                key={genre.id}
-                className="px-3 py-1 bg-zinc-800/80 rounded-full text-sm text-zinc-300 hover:bg-amber-500/20 hover:text-amber-200 transition-colors duration-200 cursor-default"
-              >
-                {genre.name}
-              </span>
-            ))}
-          </div>
-
-          {show.overview && (
-            <div className="mb-8 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-              <h2 className="text-xl font-semibold mb-3 text-zinc-200">Overview</h2>
-              <p className="text-zinc-400 leading-relaxed text-base md:text-lg">
-                {show.overview}
-              </p>
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-6 mb-8 text-zinc-400 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-            <div>
-              <span className="text-zinc-500">Total Episodes: </span>
-              <span className="text-white font-medium">{show.number_of_episodes}</span>
-            </div>
-            <div>
-              <span className="text-zinc-500">Total Seasons: </span>
-              <span className="text-white font-medium">{show.number_of_seasons}</span>
-            </div>
-          </div>
         </div>
       </div>
 
       <section>
-        <h2 className="text-2xl font-bold mb-6 animate-fade-in-up">Seasons</h2>
-        <div className="space-y-4">
-          {show.seasons.map((season, idx) => (
-            <div 
-              key={season.id} 
-              className="border border-zinc-800 rounded-lg overflow-hidden animate-fade-in-up"
-              style={{ animationDelay: `${idx * 50}ms` }}
-            >
+        <h2 className="text-xl font-semibold mb-4 text-zinc-300">Seasons</h2>
+        <div className="space-y-2">
+          {show.seasons.filter(s => s.season_number > 0).map((season, idx) => (
+            <div key={season.id} className="border border-zinc-800 rounded-lg overflow-hidden animate-fade-in-up" style={{ animationDelay: `${idx * 50}ms` }}>
               <button
-                onClick={() => toggleSeason(season.season_number)}
-                className="w-full flex items-center gap-4 p-4 bg-zinc-900 hover:bg-zinc-800 transition-colors text-left"
+                onClick={(e) => toggleSeason(e, season.season_number)}
+                className="w-full flex items-center gap-3 p-3 bg-zinc-900 hover:bg-zinc-800 active:scale-[0.99] transition-all duration-200 text-left"
               >
-                <img
-                  src={getImageUrl(season.poster_path, "w92")}
-                  alt={`Season ${season.season_number}`}
-                  className="w-12 h-16 object-cover rounded"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold">
-                    {season.name}
-                    <span className="text-zinc-500 font-normal ml-2">
-                      (Season {season.season_number})
-                    </span>
-                  </h3>
-                  <span className="text-sm text-zinc-500">
-                    {season.episode_count} Episodes
-                  </span>
-                </div>
+                <span className="text-zinc-500 font-medium w-8">
+                  S{season.season_number}
+                </span>
+                <span className="flex-1 text-zinc-300 truncate">
+                  {season.name}
+                </span>
+                <span className="text-zinc-600 text-sm">
+                  {season.episode_count} eps
+                </span>
                 <svg
-                  className={`w-5 h-5 text-zinc-400 transition-transform duration-300 ${
-                    openSeasons[season.season_number] ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 text-zinc-500 transition-transform duration-200 ${openSeasons[season.season_number] ? "rotate-180" : ""}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -145,33 +136,63 @@ export default function TVDetails() {
                 </svg>
               </button>
 
-              <div 
-                className={`overflow-hidden transition-all duration-300 ${
-                  openSeasons[season.season_number] ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="p-4 border-t border-zinc-800 bg-zinc-950">
-                  {season.overview && (
-                    <p className="text-zinc-400 mb-4 text-sm">{season.overview}</p>
-                  )}
-                  {season.episode_count > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-                      {Array.from({ length: season.episode_count }, (_, i) => i + 1).map((episode) => (
+              {openSeasons[season.season_number] && (
+                <div className="border-t border-zinc-800 bg-zinc-950">
+                  {loadingSeasons[season.season_number] ? (
+                    <div className="p-4 space-y-3">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="flex items-center gap-4 p-3 animate-shimmer rounded-md">
+                          <div className="w-6 h-4 bg-zinc-800 rounded" />
+                          <div className="flex-1">
+                            <div className="h-4 bg-zinc-800 rounded w-3/4 mb-2" />
+                            <div className="h-3 bg-zinc-800/50 rounded w-1/2" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : seasonDetails[season.season_number] ? (
+                    <div className="divide-y divide-zinc-800/50">
+                      {seasonDetails[season.season_number]!.episodes.map((episode) => (
                         <Link
-                          key={episode}
-                          to={`/tv/${show.id}/season/${season.season_number}/episode/${episode}`}
-                          className="flex items-center justify-between px-3 py-2 bg-zinc-900 rounded hover:bg-amber-500/20 hover:text-amber-200 transition-colors"
+                          key={episode.id}
+                          to={`/tv/${show.id}/season/${season.season_number}/episode/${episode.episode_number}`}
+                          className="flex items-center gap-4 p-3 hover:bg-zinc-800/50 transition-colors"
                         >
-                          <span className="text-sm">Ep {episode}</span>
-                          <span className="text-xs text-zinc-500">▶</span>
+                          <span className="text-zinc-600 text-sm w-6">
+                            {episode.episode_number}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-zinc-300 text-sm truncate">
+                              {episode.name || `Episode ${episode.episode_number}`}
+                            </p>
+                            {(episode.air_date || episode.runtime) && (
+                              <p className="text-zinc-600 text-xs mt-0.5">
+                                {[formatDate(episode.air_date), formatRuntime(episode.runtime)].filter(Boolean).join(" · ")}
+                              </p>
+                            )}
+                          </div>
+                          {episode.still_path && (
+                            <img
+                              src={getImageUrl(episode.still_path, "w92")}
+                              alt=""
+                              className="w-16 h-10 object-cover rounded"
+                            />
+                          )}
                         </Link>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-zinc-500 text-sm">No episode data available.</p>
+                    <div className="p-4 text-center">
+                      <button
+                        onClick={(e) => toggleSeason(e, season.season_number)}
+                        className="text-zinc-500 hover:text-zinc-300 text-sm"
+                      >
+                        Load episodes
+                      </button>
+                    </div>
                   )}
                 </div>
-              </div>
+              )}
             </div>
           ))}
         </div>

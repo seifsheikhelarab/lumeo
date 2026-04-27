@@ -45,34 +45,34 @@ export default function TV() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
-      <form method="GET" className="mb-8">
-        <div className="flex gap-3 max-w-xl">
+      <form method="GET" className="mb-10">
+        <div className="flex gap-3 max-w-lg">
           <input
             type="text"
             name="query"
             defaultValue={query || ""}
-            placeholder="Search TV shows..."
+            placeholder="Find a show..."
             aria-label="Search TV shows"
-            className="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+            className="flex-1 px-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
           />
           <button
             type="submit"
-            className="px-6 py-3 bg-white text-zinc-900 font-medium rounded-lg hover:scale-105 hover:bg-zinc-200 active:scale-95 transition-all duration-200"
+            className="px-5 py-2.5 bg-white text-zinc-900 font-medium rounded-lg hover:bg-zinc-100 transition-colors"
           >
             Search
           </button>
         </div>
       </form>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
         {shows.map((show, idx) => (
           <Link
             key={show.id}
             to={`/tv/${show.id}`}
             className="group block animate-fade-in-up"
-            style={{ animationDelay: `${idx * 50}ms` }}
+            style={{ animationDelay: `${idx * 30}ms` }}
           >
-            <div className="aspect-[2/3] rounded-lg overflow-hidden bg-zinc-900 mb-3 shadow-lg group-hover:shadow-amber-500/20 transition-shadow duration-300">
+            <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900 mb-3">
               <img
                 src={getImageUrl(show.poster_path, "w500")}
                 alt={show.name}
@@ -82,36 +82,38 @@ export default function TV() {
                 height={450}
               />
             </div>
-            <h3 className="font-medium text-sm truncate text-white group-hover:text-amber-200 transition-colors">
+            <h3 className="font-medium text-sm text-zinc-300 truncate group-hover:text-white transition-colors">
               {show.name}
             </h3>
-            <div className="flex items-center justify-between mt-1 text-xs text-zinc-500">
-              <span>TV Show</span>
-              <span className="px-2 py-0.5 bg-zinc-800 rounded text-amber-200/80">
-                {show.vote_average.toFixed(1)} / 10
-              </span>
-            </div>
+            <p className="text-xs text-zinc-600 mt-0.5">
+              TV Show
+            </p>
           </Link>
         ))}
       </div>
 
-      <div className="flex justify-center gap-4 mt-12">
-        {page > 1 && (
-          <Link
-            to={`/tv?page=${page - 1}${query ? `&query=${query}` : ""}`}
-            className="px-6 py-3 bg-zinc-800 text-white font-medium rounded-lg hover:bg-zinc-700 hover:scale-105 active:scale-95 transition-all duration-200"
-          >
-            Previous
-          </Link>
-        )}
-        {page < lastPage && (
-          <Link
-            to={`/tv?page=${page + 1}${query ? `&query=${query}` : ""}`}
-            className="px-6 py-3 bg-zinc-800 text-white font-medium rounded-lg hover:bg-zinc-700 hover:scale-105 active:scale-95 transition-all duration-200"
-          >
-            Next
-          </Link>
-        )}
+      <div className="flex justify-between items-center mt-16 pt-6 border-t border-zinc-800">
+        <div className="text-sm text-zinc-500">
+          Page {page} of {lastPage}
+        </div>
+        <div className="flex gap-3">
+          {page > 1 && (
+            <Link
+              to={`/tv?page=${page - 1}${query ? `&query=${query}` : ""}`}
+              className="px-5 py-2.5 bg-zinc-800 text-white font-medium rounded-lg hover:bg-zinc-700 transition-colors"
+            >
+              Previous
+            </Link>
+          )}
+          {page < lastPage && (
+            <Link
+              to={`/tv?page=${page + 1}${query ? `&query=${query}` : ""}`}
+              className="px-5 py-2.5 bg-zinc-800 text-white font-medium rounded-lg hover:bg-zinc-700 transition-colors"
+            >
+              Next
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

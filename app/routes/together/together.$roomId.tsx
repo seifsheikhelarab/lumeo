@@ -1,3 +1,4 @@
+import { Link, useLoaderData } from "react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router";
 import {
@@ -9,15 +10,40 @@ import {
   type Participant,
   type PlaybackUpdate,
 } from "~/services/socket";
+import { getTVShow } from "~/services/api";
 import { ParticipantList } from "~/components/Together/ParticipantList";
 import { Chat } from "~/components/Together/Chat";
 import { TogetherPlayer } from "~/components/Together/TogetherPlayer";
-import { STREAMING_SERVERS } from "~/services/api";
+import type { TVShow } from "~/types";
+
+export async function loader({ request }: { request: Request }) {
+  const url = new URL(request.url);
+  const contentId = url.searchParams.get("contentId");
+  const contentType = url.searchParams.get("contentType");
+  const season = url.searchParams.get("season");
+  
+  if (contentType === "episode" && contentId) {
+    try {
+      const show = await getTVShow(contentId);
+      return { show };
+    } catch (e) {
+      return { show: null };
+    }
+  }
+  return { show: null };
+}
+
+function isLastInShow(show: TVShow | null, currentSeason: number, currentEpisode: number, totalEpisodes: number): boolean {
+  if (!show || currentEpisode < totalEpisodes) return false;
+  const nextSeasons = show.seasons.filter(s => s.season_number > currentSeason && s.episode_count > 0);
+  return nextSeasons.length === 0;
+}
 
 export default function TogetherRoom() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { show } = useLoaderData<typeof loader>();
   const [roomState, setRoomState] = useState<RoomState | null>(null);
   const [userName, setUserName] = useState(() => location.state?.userName || "");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -27,6 +53,10 @@ export default function TogetherRoom() {
   const [playbackTime, setPlaybackTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackUpdatedBy, setPlaybackUpdatedBy] = useState<string | undefined>();
+  const lastSyncEmitRef = useRef(0);
+  const syncPendingRef = useRef(false);
+  const isReconnectingRef = useRef(false);
+  const lastPlaybackStateRef = useRef({ time: 0, playing: false });
 
   const isCreateMode = roomId === "CREATE";
   const isJoinMode = roomId && roomId.length === 6 && roomId !== "CREATE";
@@ -46,7 +76,13 @@ export default function TogetherRoom() {
         setRoomState(data);
         setIsConnecting(false);
         setShowNameModal(false);
-        navigate(`/together/${data.roomId}?contentId=${data.contentId}&contentType=${data.contentType}`, { replace: true });
+        const query = new URLSearchParams({
+          contentId: data.contentId,
+          contentType: data.contentType,
+          ...(data.season ? { season: data.season } : {}),
+          ...(data.episode ? { episode: data.episode } : {}),
+        }).toString();
+        navigate(`/together/${data.roomId}?${query}`, { replace: true });
       });
 
       socket.once("room-joined", (data: RoomState) => {
@@ -135,6 +171,48 @@ export default function TogetherRoom() {
       setPlaybackUpdatedBy(data.updatedBy);
     });
 
+    socket.on("sync-response", (data: { currentTime: number; isPlaying: boolean }) => {
+      if (!roomState?.isHost) return;
+      setIsPlaying(data.isPlaying);
+      setPlaybackTime(data.currentTime);
+    });
+
+    socket.on("sync-request", () => {
+      if (!roomState?.isHost) return;
+      getSocket().emit("sync-response", {
+        roomId: roomState.roomId,
+        currentTime: playbackTime,
+        isPlaying: isPlaying,
+      });
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+      if (reason === "io server disconnect" || reason === "transport close") {
+        isReconnectingRef.current = true;
+        socket.connect();
+      }
+    });
+
+    socket.on("connect", () => {
+      if (isReconnectingRef.current && roomState) {
+        console.log("Socket reconnected, requesting sync...");
+        isReconnectingRef.current = false;
+        if (!roomState.isHost) {
+          getSocket().emit("join-room", { 
+            roomId: roomState.roomId, 
+            userName: roomState.participant.name,
+            isReconnect: true
+          });
+        } else {
+          getSocket().emit("rejoin-room", { 
+            roomId: roomState.roomId, 
+            userName: roomState.participant.name 
+          });
+        }
+      }
+    });
+
     return () => {
       socket.off("participant-joined");
       socket.off("participant-left");
@@ -142,6 +220,10 @@ export default function TogetherRoom() {
       socket.off("chat-message");
       socket.off("room-updated");
       socket.off("playback-update");
+      socket.off("sync-request");
+      socket.off("sync-response");
+      socket.off("disconnect");
+      socket.off("connect");
     };
   }, [roomState?.roomId]);
 
@@ -165,6 +247,11 @@ export default function TogetherRoom() {
     navigate("/");
   };
 
+  const handleSyncRequest = useCallback(() => {
+    if (!roomState) return;
+    getSocket().emit("sync-request", { roomId: roomState.roomId });
+  }, [roomState]);
+
   const handleSendMessage = (message: string) => {
     if (roomState) {
       getSocket().emit("chat-message", { roomId: roomState.roomId, message });
@@ -177,26 +264,65 @@ export default function TogetherRoom() {
     }
   };
 
-  const handlePlaybackControl = (action: "play" | "pause" | "restart") => {
-    console.log("handlePlaybackControl called", { action, isHost: roomState?.isHost, isStarted: roomState?.isStarted });
-    if (!roomState?.isHost || !roomState.isStarted) return;
-    
-    const newIsPlaying = action !== "pause";
-    const userName = roomState.participant.name;
-    
-    console.log("Emitting playback-sync", { roomId: roomState.roomId, currentTime: action === "restart" ? 0 : playbackTime, isPlaying: newIsPlaying });
-    
+  const emitPlaybackSync = useCallback((videoTime: number, playing: boolean) => {
+    const now = Date.now();
+    if (now - lastSyncEmitRef.current < 200) return;
+    lastSyncEmitRef.current = now;
+    syncPendingRef.current = false;
+
+    setIsPlaying(playing);
+    setPlaybackTime(videoTime);
+    setPlaybackUpdatedBy(roomState?.participant.name);
     getSocket().emit("playback-sync", {
-      roomId: roomState.roomId,
-      currentTime: action === "restart" ? 0 : playbackTime,
-      isPlaying: newIsPlaying,
+      roomId: roomState?.roomId,
+      currentTime: videoTime,
+      isPlaying: playing,
     });
-  };
+  }, [roomState]);
+
+  const handlePlayPause = useCallback((playing: boolean, videoTime: number) => {
+    if (!roomState?.isHost || !roomState.isStarted) return;
+    if (syncPendingRef.current) return;
+    syncPendingRef.current = true;
+    emitPlaybackSync(videoTime, playing);
+  }, [roomState, emitPlaybackSync]);
+
+  const handleSeek = useCallback((videoTime: number) => {
+    if (!roomState?.isHost || !roomState.isStarted) return;
+    if (syncPendingRef.current) return;
+    syncPendingRef.current = true;
+    setPlaybackTime(videoTime);
+    emitPlaybackSync(videoTime, isPlaying);
+  }, [roomState, isPlaying, emitPlaybackSync]);
 
   const copyLink = () => {
     const url = `${window.location.origin}/together/${roomState?.roomId}?contentId=${roomState?.contentId}&contentType=${roomState?.contentType}`;
     navigator.clipboard.writeText(url);
   };
+
+  const isTVEpisode = roomState?.contentType === "episode" && roomState?.season && roomState?.episode;
+  const currentSeason = isTVEpisode ? Number(roomState.season) : 0;
+  const currentEpisode = isTVEpisode ? Number(roomState.episode) : 0;
+  const currentSeasonData = show?.seasons.find(s => s.season_number === currentSeason);
+  const totalEpisodes = currentSeasonData?.episode_count || 1;
+  const isFirstEpisode = currentSeason === 1 && currentEpisode === 1;
+  const isLastEpisode = isLastInShow(show, currentSeason, currentEpisode, totalEpisodes);
+  const hasPrevBtn = !isFirstEpisode;
+  const hasNextBtn = !isLastEpisode;
+  
+  const prevEpisode = isTVEpisode && hasPrevBtn
+    ? currentEpisode > 1 
+      ? { season: currentSeason, episode: currentEpisode - 1 }
+      : { season: currentSeason - 1, episode: (show?.seasons.find(s => s.season_number === currentSeason - 1)?.episode_count || 1) }
+    : null;
+    
+  const nextEpisode = isTVEpisode && hasNextBtn
+    ? currentEpisode < totalEpisodes
+      ? { season: currentSeason, episode: currentEpisode + 1 }
+      : { season: currentSeason + 1, episode: 1 }
+    : null;
+  
+  const contentId = roomState?.contentId;
 
   if (showNameModal) {
     return (
@@ -287,71 +413,51 @@ export default function TogetherRoom() {
               contentType={roomState.contentType}
               season={roomState.season}
               episode={roomState.episode}
-              isStarted={roomState.isStarted}
               server={roomState.server}
+              isStarted={roomState.isStarted}
+              isHost={roomState.isHost}
               currentTime={playbackTime}
               isPlaying={isPlaying}
               playbackUpdatedBy={playbackUpdatedBy}
+              onPlayPause={handlePlayPause}
+              onSeek={handleSeek}
+              onSyncRequest={handleSyncRequest}
             />
             
-            {roomState.isStarted && (
-              <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-zinc-400">Playback:</span>
-                    <div className="flex items-center gap-2">
-                      {roomState.isHost ? (
-                        <>
-                          <button
-                            onClick={() => handlePlaybackControl(isPlaying ? "pause" : "play")}
-                            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                              isPlaying
-                                ? "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border border-yellow-500/30"
-                                : "bg-green-500/10 text-green-500 hover:bg-green-500/20 border border-green-500/30"
-                            }`}
-                          >
-                            {isPlaying ? (
-                              <span className="flex items-center gap-2">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                                </svg>
-                                Pause
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-2">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M8 5v14l11-7z"/>
-                                </svg>
-                                Play
-                              </span>
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handlePlaybackControl("restart")}
-                            className="px-4 py-2 rounded-lg font-medium text-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/30 transition-colors"
-                          >
-                            <span className="flex items-center gap-2">
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-                              </svg>
-                              Restart
-                            </span>
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-sm text-zinc-500">
-                          Only the host can control playback
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${isPlaying ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`} />
-                    <span className="text-xs text-zinc-400">
-                      {isPlaying ? "Playing" : "Paused"}
-                    </span>
-                  </div>
-                </div>
+            {isTVEpisode && roomState.isHost && (
+              <div className="flex flex-nowrap items-center justify-center gap-3">
+                <Link
+                  to={prevEpisode ? `/together/${roomState.roomId}?contentId=${contentId}&contentType=episode&season=${prevEpisode.season}&episode=${prevEpisode.episode}` : "#"}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${hasPrevBtn ? "bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-105 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
+                  aria-disabled={!hasPrevBtn}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Prev Episode
+                </Link>
+                <span className="px-4 py-2 bg-zinc-900 rounded-lg text-zinc-400 font-plex-mono">
+                  S{currentSeason}E{currentEpisode}
+                </span>
+                <Link
+                  to={nextEpisode && hasNextBtn ? `/together/${roomState.roomId}?contentId=${contentId}&contentType=episode&season=${nextEpisode.season}&episode=${nextEpisode.episode}` : "#"}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${hasNextBtn ? "bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-105 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
+                  aria-disabled={!hasNextBtn}
+                >
+                  Next Episode
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            )}
+            
+            {roomState.isStarted && !roomState.isHost && (
+              <div className="bg-zinc-900/50 rounded-lg px-4 py-3 border border-zinc-800 flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isPlaying ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`} />
+                <span className="text-sm text-zinc-400">
+                  {isPlaying ? "Playing" : "Paused"} · host controls playback
+                </span>
               </div>
             )}
             
@@ -364,19 +470,6 @@ export default function TogetherRoom() {
                   </div>
                   
                   <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <label className="text-xs font-medium text-zinc-500 uppercase">Server:</label>
-                      <select
-                        value={roomState.server}
-                        onChange={(e) => handleUpdateRoom({ server: e.target.value })}
-                        className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
-                      >
-                        {STREAMING_SERVERS.map(s => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
                     <button
                       onClick={() => handleUpdateRoom({ isStarted: !roomState.isStarted })}
                       className={`px-6 py-2 rounded-lg font-bold transition-all ${

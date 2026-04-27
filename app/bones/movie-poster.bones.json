@@ -1,0 +1,74 @@
+{
+  "breakpoints": {
+    "375": {
+      "name": "movie-poster",
+      "viewportWidth": 327,
+      "width": 327,
+      "height": 491,
+      "bones": [
+        [
+          0,
+          0,
+          100,
+          491,
+          12,
+          true
+        ],
+        [
+          0,
+          0,
+          100,
+          491,
+          8
+        ]
+      ]
+    },
+    "768": {
+      "name": "movie-poster",
+      "viewportWidth": 288,
+      "width": 288,
+      "height": 432,
+      "bones": [
+        [
+          0,
+          0,
+          100,
+          432,
+          12,
+          true
+        ],
+        [
+          0,
+          0,
+          100,
+          432,
+          8
+        ]
+      ]
+    },
+    "1280": {
+      "name": "movie-poster",
+      "viewportWidth": 320,
+      "width": 320,
+      "height": 480,
+      "bones": [
+        [
+          0,
+          0,
+          100,
+          480,
+          12,
+          true
+        ],
+        [
+          0,
+          0,
+          100,
+          480,
+          8
+        ]
+      ]
+    }
+  },
+  "_hash": "4ba90f84ee6bcd345335b32edf54df8f"
+}

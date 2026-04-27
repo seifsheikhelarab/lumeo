@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3001";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || `http://localhost:5173`;
 
 let socket: Socket | null = null;
 
@@ -92,4 +92,10 @@ export interface PlaybackUpdate {
   currentTime: number;
   isPlaying: boolean;
   updatedBy?: string;
+}
+
+export interface SyncResponse {
+  roomId: string;
+  currentTime: number;
+  isPlaying: boolean;
 }

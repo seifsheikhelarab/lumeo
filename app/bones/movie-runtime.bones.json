@@ -1,0 +1,71 @@
+{
+  "breakpoints": {
+    "375": {
+      "name": "movie-runtime",
+      "viewportWidth": 327,
+      "width": 327,
+      "height": 24,
+      "bones": [
+        [
+          0,
+          2,
+          20.236,
+          20,
+          8
+        ],
+        [
+          20.236,
+          -2,
+          23.4279,
+          28,
+          4
+        ]
+      ]
+    },
+    "768": {
+      "name": "movie-runtime",
+      "viewportWidth": 400,
+      "width": 400,
+      "height": 24,
+      "bones": [
+        [
+          0,
+          2,
+          16.543,
+          20,
+          8
+        ],
+        [
+          16.543,
+          -2,
+          19.1523,
+          28,
+          4
+        ]
+      ]
+    },
+    "1280": {
+      "name": "movie-runtime",
+      "viewportWidth": 864,
+      "width": 864,
+      "height": 24,
+      "bones": [
+        [
+          0,
+          2,
+          7.6588,
+          20,
+          8
+        ],
+        [
+          7.6588,
+          -2,
+          8.8668,
+          28,
+          4
+        ]
+      ]
+    }
+  },
+  "_hash": "8d0b3aa9ffaa58a15b5f4accf666e8c6"
+}

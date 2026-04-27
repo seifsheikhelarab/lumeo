@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import type { ChatMessage } from "~/services/socket";
 
 interface ChatProps {
@@ -8,11 +8,6 @@ interface ChatProps {
 
 export function Chat({ messages, onSendMessage }: ChatProps) {
   const [input, setInput] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +36,6 @@ export function Chat({ messages, onSendMessage }: ChatProps) {
             </div>
           ))
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       <form onSubmit={handleSubmit} className="p-3 border-t border-zinc-800">

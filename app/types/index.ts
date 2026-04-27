@@ -50,3 +50,24 @@ export interface TVSearchResult {
   page: number;
   total_pages: number;
 }
+
+export interface Episode {
+  id: number;
+  episode_number: number;
+  name: string;
+  overview: string;
+  air_date: string;
+  vote_average: number;
+  still_path: string | null;
+  runtime: number;
+}
+
+export interface SeasonDetails {
+  id: number;
+  name: string;
+  season_number: number;
+  overview: string;
+  air_date: string;
+  poster_path: string | null;
+  episodes: Episode[];
+}
