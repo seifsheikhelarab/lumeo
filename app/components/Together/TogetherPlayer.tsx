@@ -292,10 +292,6 @@ export function TogetherPlayer({
             </span>
           </div>
         )}
-
-        {!isHost && (
-          <div className="absolute inset-0 cursor-not-allowed bg-transparent" title="Only the host controls playback" />
-        )}
       </div>
 
       <div className="bg-zinc-900/50 rounded-lg px-4 py-2 border border-zinc-800 inline-flex items-center gap-2">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { ChatMessage } from "~/services/socket";
 
 interface ChatProps {
@@ -8,6 +8,11 @@ interface ChatProps {
 
 export function Chat({ messages, onSendMessage }: ChatProps) {
   const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,20 +28,21 @@ export function Chat({ messages, onSendMessage }: ChatProps) {
         Chat
       </h3>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.length === 0 ? (
-          <p className="text-zinc-500 text-sm text-center py-4">
-            No messages yet. Say hi!
-          </p>
-        ) : (
-          messages.map((msg, idx) => (
-            <div key={msg.id || `msg-${idx}`} className="text-sm bg-zinc-800/50 p-2 rounded-lg border border-zinc-700/30">
-              <span className="font-bold text-indigo-400">{msg.userName || "Anonymous"}: </span>
-              <span className="text-zinc-200 break-words">{msg.message}</span>
-            </div>
-          ))
-        )}
-      </div>
+<div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {messages.length === 0 ? (
+            <p className="text-zinc-500 text-sm text-center py-4">
+              No messages yet. Say hi!
+            </p>
+          ) : (
+            messages.map((msg, idx) => (
+              <div key={msg.id || `msg-${idx}`} className="text-sm bg-zinc-800/50 p-2 rounded-lg border border-zinc-700/30">
+                <span className="font-bold text-indigo-400">{msg.userName || "Anonymous"}: </span>
+                <span className="text-zinc-200 break-words">{msg.message}</span>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
       <form onSubmit={handleSubmit} className="p-3 border-t border-zinc-800">
         <div className="flex gap-2">
