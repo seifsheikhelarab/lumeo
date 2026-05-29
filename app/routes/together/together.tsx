@@ -53,9 +53,15 @@ export default function TogetherCreate() {
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
       <div className="bg-zinc-900 rounded-xl p-8 max-w-md w-full border border-zinc-800">
         <h1 className="text-2xl font-bold text-white mb-2">Start Watch Party</h1>
-        <p className="text-zinc-400 mb-6">
+        <p className="text-zinc-400 mb-4">
           Create a room and invite friends to watch {contentType === "movie" ? "this movie" : "this episode"} together.
         </p>
+
+        <div className="bg-amber-900/30 border border-amber-700/50 rounded-lg p-3 mb-4">
+          <p className="text-amber-200 text-sm">
+            <span className="font-medium">Tip:</span> Don't press buttons too quickly (play, pause, seek, etc.). Rapid actions can desync your party. Wait a moment between actions.
+          </p>
+        </div>
 
         <input
           type="text"

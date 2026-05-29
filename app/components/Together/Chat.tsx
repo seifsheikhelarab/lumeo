@@ -19,6 +19,14 @@ export function Chat({ messages, onSendMessage }: ChatProps) {
     if (input.trim()) {
       onSendMessage(input.trim());
       setInput("");
+      e.stopPropagation();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
     }
   };
 
@@ -50,6 +58,7 @@ export function Chat({ messages, onSendMessage }: ChatProps) {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500"
           />

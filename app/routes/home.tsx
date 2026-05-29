@@ -18,9 +18,9 @@ export default function Home() {
       <div className="flex-1 flex items-center">
         <div className="max-w-7xl mx-auto px-6 py-24 w-full">
           <div className="max-w-2xl">
-            <p className="text-sm uppercase tracking-widest text-zinc-500 mb-4 animate-fade-in-up" style={{ animationDelay: "0ms" }}>
+            {/* <p className="text-sm uppercase tracking-widest text-zinc-500 mb-4 animate-fade-in-up" style={{ animationDelay: "0ms" }}>
               Streaming Interface
-            </p>
+            </p> */}
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.05] animate-fade-in-up" style={{ animationDelay: "100ms", fontFamily: 'var(--font-display)' }}>
               Lumeo
             </h1>

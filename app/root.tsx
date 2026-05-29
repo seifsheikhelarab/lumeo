@@ -22,7 +22,10 @@ export const links: Route.LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap",
   },
-  { rel: "icon", type: "image/jpeg", href: "/img/icon.jpg" },
+  { rel: "icon", href: "/favicon.ico" },
+  { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+  { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+  { rel: "manifest", href: "/site.webmanifest" },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -31,6 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
         <Meta />
         <Links />
       </head>
@@ -70,6 +74,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
         <title>{`${message} - Lumeo`}</title>
         <Meta />
         <Links />
