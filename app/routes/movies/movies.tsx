@@ -1,6 +1,6 @@
 import { Link, useLoaderData, useRouteError, isRouteErrorResponse } from "react-router";
 import type { Route } from "./+types/movies";
-import { getMovies, getImageUrl } from "~/services/api";
+import { getMovies, getImageUrl, imgErrorHandler } from "~/services/api";
 import { ErrorDisplay } from "~/components/UI/ErrorDisplay";
 import { Skeleton } from "boneyard-js/react";
 
@@ -87,14 +87,15 @@ export default function Movies() {
                 style={{ animationDelay: `${idx * 30}ms` }}
               >
                 <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900 mb-3">
-                  <img
-                    src={getImageUrl(movie.poster_path, "w500")}
-                    alt={movie.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    loading="lazy"
-                    width={300}
-                    height={450}
-                  />
+<img
+    src={getImageUrl(movie.poster_path, "w500")}
+    alt={movie.title}
+    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+    loading="lazy"
+    width={300}
+    height={450}
+    onError={imgErrorHandler}
+  />
                 </div>
                 <h3 className="font-medium text-sm text-zinc-300 truncate group-hover:text-white transition-colors">
                   {movie.title}

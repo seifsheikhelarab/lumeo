@@ -1,6 +1,6 @@
 import { Link, useLoaderData } from "react-router";
 import type { Route } from "./+types/home";
-import { getMovies, getImageUrl } from "~/services/api";
+import { getMovies, getImageUrl, imgErrorHandler } from "~/services/api";
 
 export async function loader({}: Route.LoaderArgs) {
   const data = await getMovies(null, 1);
@@ -61,14 +61,15 @@ export default function Home() {
                   style={{ animationDelay: `${idx * 50}ms` }}
                 >
                   <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900">
-                    <img
-                      src={getImageUrl(movie.poster_path, "w342")}
-                      alt={movie.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
-                      width={200}
-                      height={300}
-                    />
+<img
+    src={getImageUrl(movie.poster_path, "w342")}
+    alt={movie.title}
+    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+    loading="lazy"
+    width={200}
+    height={300}
+    onError={imgErrorHandler}
+  />
                   </div>
                   <h3 className="font-medium text-xs text-zinc-500 truncate mt-2 group-hover:text-zinc-300 transition-colors">
                     {movie.title}

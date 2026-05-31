@@ -1,6 +1,6 @@
 import { Link, useLoaderData, useRouteError, isRouteErrorResponse, useNavigation } from "react-router";
 import type { Route } from "./+types/movies.$id";
-import { getMovie, getImageUrl } from "~/services/api";
+import { getMovie, getImageUrl, imgErrorHandler } from "~/services/api";
 import { ErrorDisplay, NotFound } from "~/components/UI/ErrorDisplay";
 import { Skeleton } from "boneyard-js/react";
 
@@ -74,13 +74,14 @@ export default function MovieDetails() {
         >
           <div className="flex-shrink-0 w-full md:w-72 lg:w-80 mx-auto md:mx-0 animate-fade-in-up" style={{ animationDelay: "0ms" }}>
             <div className="rounded-xl overflow-hidden bg-zinc-900 shadow-2xl">
-              <img
-                src={getImageUrl(movie.poster_path, "w500")}
-                alt={`${movie.title} poster`}
-                className="w-full h-auto"
-                width={400}
-                height={600}
-              />
+<img
+    src={getImageUrl(movie.poster_path, "w500")}
+    alt={`${movie.title} poster`}
+    className="w-full h-auto"
+    width={400}
+    height={600}
+    onError={imgErrorHandler}
+  />
             </div>
           </div>
         </Skeleton>

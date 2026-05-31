@@ -1,6 +1,6 @@
 import { Link, useLoaderData, useRouteError, isRouteErrorResponse } from "react-router";
 import type { Route } from "./+types/tv";
-import { getTVShows, getImageUrl } from "~/services/api";
+import { getTVShows, getImageUrl, imgErrorHandler } from "~/services/api";
 import { ErrorDisplay } from "~/components/UI/ErrorDisplay";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -85,14 +85,15 @@ export default function TV() {
               style={{ animationDelay: `${idx * 30}ms` }}
             >
               <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900 mb-3">
-                <img
-                  src={getImageUrl(show.poster_path, "w500")}
-                  alt={show.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  loading="lazy"
-                  width={300}
-                  height={450}
-                />
+<img
+    src={getImageUrl(show.poster_path, "w500")}
+    alt={show.name}
+    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+    loading="lazy"
+    width={300}
+    height={450}
+    onError={imgErrorHandler}
+  />
               </div>
               <h3 className="font-medium text-sm text-zinc-300 truncate group-hover:text-white transition-colors">
                 {show.name}

@@ -61,9 +61,15 @@ export async function getTVSeason(tvId: string, seasonNumber: number): Promise<S
   return handleResponse(res);
 }
 
+const NO_POSTER = "/img/no-poster.svg";
+
 export function getImageUrl(path: string | null, size: string = "original"): string {
-  if (!path) return "/img/noPoster.png";
+  if (!path) return NO_POSTER;
   return `https://image.tmdb.org/t/p/${size}${path}`;
+}
+
+export function imgErrorHandler(e: React.SyntheticEvent<HTMLImageElement>) {
+  e.currentTarget.src = NO_POSTER;
 }
 
 export const STREAMING_SERVERS = [

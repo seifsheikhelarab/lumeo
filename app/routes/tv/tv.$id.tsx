@@ -1,7 +1,7 @@
 import { Link, useLoaderData, useRouteError, isRouteErrorResponse } from "react-router";
 import { useState } from "react";
 import type { Route } from "./+types/tv.$id";
-import { getTVShow, getTVSeason, getImageUrl } from "~/services/api";
+import { getTVShow, getTVSeason, getImageUrl, imgErrorHandler } from "~/services/api";
 import { ErrorDisplay, NotFound } from "~/components/UI/ErrorDisplay";
 import type { SeasonDetails } from "~/types";
 
@@ -86,11 +86,12 @@ export default function TVDetails() {
     <div className="max-w-4xl mx-auto px-6 py-8">
       <div className="flex gap-8 mb-12 animate-fade-in-up" style={{ animationDelay: "0ms" }}>
         <div className="flex-shrink-0 w-40">
-          <img
-            src={getImageUrl(show.poster_path, "w300")}
-            alt={`${show.name} poster`}
-            className="w-full rounded-lg"
-          />
+<img
+    src={getImageUrl(show.poster_path, "w300")}
+    alt={`${show.name} poster`}
+    className="w-full rounded-lg"
+    onError={imgErrorHandler}
+  />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -117,13 +118,21 @@ export default function TVDetails() {
                 onClick={(e) => toggleSeason(e, season.season_number)}
                 className="w-full flex items-center gap-3 p-3 bg-zinc-900 hover:bg-zinc-800 active:scale-[0.99] transition-all duration-200 text-left"
               >
-                <span className="text-zinc-500 font-medium w-8">
+                {season.poster_path && (
+                  <img
+                    src={getImageUrl(season.poster_path, "w92")}
+                    alt=""
+                    className="w-10 h-15 object-cover rounded flex-shrink-0"
+                    onError={imgErrorHandler}
+                  />
+                )}
+                <span className="text-zinc-500 font-medium w-8 flex-shrink-0">
                   S{season.season_number}
                 </span>
                 <span className="flex-1 text-zinc-300 truncate">
                   {season.name}
                 </span>
-                <span className="text-zinc-600 text-sm">
+                <span className="text-zinc-600 text-sm flex-shrink-0">
                   {season.episode_count} eps
                 </span>
                 <svg
@@ -170,13 +179,19 @@ export default function TVDetails() {
                                 {[formatDate(episode.air_date), formatRuntime(episode.runtime)].filter(Boolean).join(" · ")}
                               </p>
                             )}
+                            {episode.overview && (
+                              <p className="text-xs text-zinc-500 mt-1.5 line-clamp-2 leading-relaxed">
+                                {episode.overview}
+                              </p>
+                            )}
                           </div>
                           {episode.still_path && (
-                            <img
-                              src={getImageUrl(episode.still_path, "w92")}
-                              alt=""
-                              className="w-16 h-10 object-cover rounded"
-                            />
+<img
+    src={getImageUrl(episode.still_path, "w92")}
+    alt=""
+    className="w-16 h-10 object-cover rounded"
+    onError={imgErrorHandler}
+  />
                           )}
                         </Link>
                       ))}
