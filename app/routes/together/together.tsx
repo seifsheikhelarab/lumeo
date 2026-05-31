@@ -40,7 +40,7 @@ export default function TogetherCreate() {
           </p>
           <a
             href="/"
-            className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+            className="inline-block bg-white text-zinc-900 font-medium px-6 py-3 rounded-lg hover:bg-zinc-200 transition-colors"
           >
             Go to Home
           </a>
@@ -57,9 +57,9 @@ export default function TogetherCreate() {
           Create a room and invite friends to watch {contentType === "movie" ? "this movie" : "this episode"} together.
         </p>
 
-        <div className="bg-amber-900/30 border border-amber-700/50 rounded-lg p-3 mb-4">
-          <p className="text-amber-200 text-sm">
-            <span className="font-medium">Tip:</span> Don't press buttons too quickly (play, pause, seek, etc.). Rapid actions can desync your party. Wait a moment between actions.
+        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3 mb-4">
+          <p className="text-zinc-400 text-sm">
+            Playback syncs automatically across the party. If things drift, you can request a sync.
           </p>
         </div>
 
@@ -68,14 +68,14 @@ export default function TogetherCreate() {
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
           placeholder="Your name"
-          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 mb-4"
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500 mb-4"
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
         />
 
         <button
           onClick={handleCreate}
           disabled={!userName.trim() || isCreating}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg transition-colors"
+          className="w-full bg-white text-zinc-900 font-medium py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isCreating ? "Creating..." : "Create Party"}
         </button>

@@ -250,8 +250,8 @@ export function TogetherPlayer({
   if (!isStarted) {
     return (
       <div className="aspect-video bg-zinc-900 rounded-lg flex flex-col items-center justify-center p-8 text-center border border-zinc-800 shadow-2xl">
-        <div className="w-16 h-16 rounded-full bg-indigo-600/20 flex items-center justify-center mb-6">
-          <svg className="w-8 h-8 text-indigo-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-6">
+          <svg className="w-8 h-8 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -296,7 +296,7 @@ export function TogetherPlayer({
 
       <div className="bg-zinc-900/50 rounded-lg px-4 py-2 border border-zinc-800 inline-flex items-center gap-2">
         <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Source:</span>
-        <span className="text-xs text-indigo-400 font-mono">vidfast.pro</span>
+        <span className="text-xs text-zinc-400 font-mono">vidfast.pro</span>
       </div>
     </div>
   );

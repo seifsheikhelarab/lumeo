@@ -1,5 +1,11 @@
-import { Link } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import type { Route } from "./+types/home";
+import { getMovies, getImageUrl } from "~/services/api";
+
+export async function loader({}: Route.LoaderArgs) {
+  const data = await getMovies(null, 1);
+  return { trending: data.results.slice(0, 6) };
+}
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -13,14 +19,13 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const { trending } = useLoaderData<typeof loader>();
+
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <div className="flex-1 flex items-center">
         <div className="max-w-7xl mx-auto px-6 py-24 w-full">
-          <div className="max-w-2xl">
-            {/* <p className="text-sm uppercase tracking-widest text-zinc-500 mb-4 animate-fade-in-up" style={{ animationDelay: "0ms" }}>
-              Streaming Interface
-            </p> */}
+          <div className="max-w-2xl mb-16">
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.05] animate-fade-in-up" style={{ animationDelay: "100ms", fontFamily: 'var(--font-display)' }}>
               Lumeo
             </h1>
@@ -40,6 +45,36 @@ export default function Home() {
               >
                 TV Shows
               </Link>
+            </div>
+          </div>
+
+          <div className="animate-fade-in-up" style={{ animationDelay: "500ms" }}>
+            <p className="text-xs uppercase tracking-widest text-zinc-600 mb-5">
+              Trending Now
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+              {trending.map((movie, idx) => (
+                <Link
+                  key={movie.id}
+                  to={`/movies/${movie.id}`}
+                  className="group block"
+                  style={{ animationDelay: `${idx * 50}ms` }}
+                >
+                  <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900">
+                    <img
+                      src={getImageUrl(movie.poster_path, "w342")}
+                      alt={movie.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      loading="lazy"
+                      width={200}
+                      height={300}
+                    />
+                  </div>
+                  <h3 className="font-medium text-xs text-zinc-500 truncate mt-2 group-hover:text-zinc-300 transition-colors">
+                    {movie.title}
+                  </h3>
+                </Link>
+              ))}
             </div>
           </div>
         </div>

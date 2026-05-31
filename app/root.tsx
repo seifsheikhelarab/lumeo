@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -48,6 +49,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+        (e.ctrlKey && e.key === "U")
+      ) {
+        e.preventDefault();
+        window.location.href = "https://google.com";
+      }
+    }
+
+    function contextHandler(e: MouseEvent) {
+      e.preventDefault();
+      window.location.href = "https://google.com";
+    }
+
+    window.addEventListener("keydown", handler);
+    window.addEventListener("contextmenu", contextHandler);
+    return () => {
+      window.removeEventListener("keydown", handler);
+      window.removeEventListener("contextmenu", contextHandler);
+    };
+  }, []);
+
   return <Outlet />;
 }
 

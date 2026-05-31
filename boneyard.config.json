@@ -2,15 +2,10 @@
   "out": "./app/bones",
   "breakpoints": [375, 768, 1280],
   "wait": 1000,
-  "darkColor": "#2a2a2a",
   "color": "#1a1a1a",
+  "darkColor": "#2a2a2a",
   "animate": "shimmer",
+  "shimmerColor": "#2a2a2a",
   "darkShimmerColor": "#333333",
-  "speed": "1.5s",
-  "routes": [
-    "/movies/550",
-    "/movies/680",
-    "/tv/1396",
-    "/home"
-  ]
+  "speed": "1.5s"
 }

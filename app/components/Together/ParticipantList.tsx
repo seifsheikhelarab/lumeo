@@ -17,7 +17,7 @@ export function ParticipantList({ participants, currentUserId }: ParticipantList
             key={participant.id || `part-${idx}`}
             className="flex items-center gap-3 text-zinc-200"
           >
-            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-medium">
+            <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-medium">
               {participant.name.charAt(0).toUpperCase()}
             </div>
             <span className="flex-1 truncate">

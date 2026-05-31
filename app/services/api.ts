@@ -67,11 +67,17 @@ export function getImageUrl(path: string | null, size: string = "original"): str
 }
 
 export const STREAMING_SERVERS = [
-  { id: "vidfast", name: "Server 1", baseUrl: "https://vidfast.pro" },
-  { id: "moviesapi", name: "Server 2", baseUrl: "https://moviesapi.to" },
-  { id: "pstream", name: "Server 3", baseUrl: "https://iframe.pstream.org" },
-  { id: "rivestream", name: "Server 4", baseUrl: "https://rivestream.org" },
-  { id: "videasy", name: "Server 5", baseUrl: "https://player.videasy.net" },
+  { id: "vidfast", name: "VidFast", baseUrl: "https://vidfast.pro" },
+  { id: "moviesapi", name: "MoviesAPI", baseUrl: "https://moviesapi.to" },
+  { id: "pstream", name: "PStream", baseUrl: "https://iframe.pstream.org" },
+  { id: "111movies", name: "111Movies", baseUrl: "https://111movies.net" },
+  { id: "cinezo", name: "Cinezo", baseUrl: "https://api.cinezo.net" },
+  { id: "vidcore", name: "VidCore", baseUrl: "https://vidcore.net" },
+  { id: "vidking", name: "VidKing", baseUrl: "https://www.vidking.net" },
+  { id: "vidlink", name: "VidLink", baseUrl: "https://vidlink.pro" },
+  { id: "videasy", name: "Videasy", baseUrl: "https://player.videasy.net" },
+  { id: "vidsrc", name: "VidSrc", baseUrl: "https://vidsrc.cc" },
+  { id: "2embed", name: "2Embed", baseUrl: "https://www.2embed.cc" },
 ];
 
 export function getMovieEmbedUrl(id: string, server: string = "vidfast"): string {
@@ -82,10 +88,22 @@ export function getMovieEmbedUrl(id: string, server: string = "vidfast"): string
       return `${STREAMING_SERVERS[1].baseUrl}/movie/${id}`;
     case "pstream":
       return `${STREAMING_SERVERS[2].baseUrl}/embed/tmdb-movie-${id}`;
-    case "rivestream":
-      return `${STREAMING_SERVERS[3].baseUrl}/embed?type=movie&id=${id}`;
+    case "111movies":
+      return `${STREAMING_SERVERS[3].baseUrl}/movie/${id}?autoplay=1`;
+    case "cinezo":
+      return `${STREAMING_SERVERS[4].baseUrl}/movie/${id}`;
+    case "vidcore":
+      return `${STREAMING_SERVERS[5].baseUrl}/movie/${id}`;
+    case "vidking":
+      return `${STREAMING_SERVERS[6].baseUrl}/embed/movie/${id}`;
+    case "vidlink":
+      return `${STREAMING_SERVERS[7].baseUrl}/movie/${id}`;
     case "videasy":
-      return `${STREAMING_SERVERS[4].baseUrl}/movie/${id}&color=8B5CF6&provider=Poseidon`;
+      return `${STREAMING_SERVERS[8].baseUrl}/movie/${id}&color=8B5CF6&provider=Poseidon`;
+    case "vidsrc":
+      return `${STREAMING_SERVERS[9].baseUrl}/v3/embed/movie/${id}`;
+    case "2embed":
+      return `${STREAMING_SERVERS[10].baseUrl}/embed/${id}`;
     default:
       return `${STREAMING_SERVERS[0].baseUrl}/movie/${id}`;
   }
@@ -99,10 +117,22 @@ export function getTVEmbedUrl(id: string, season: string, episode: string, serve
       return `${STREAMING_SERVERS[1].baseUrl}/tv/${id}-${season}-${episode}`;
     case "pstream":
       return `${STREAMING_SERVERS[2].baseUrl}/embed/tmdb-tv-${id}/${season}/${episode}`;
-    case "rivestream":
-      return `${STREAMING_SERVERS[3].baseUrl}/embed?type=tv&id=${id}&season=${season}&episode=${episode}`;
+    case "111movies":
+      return `${STREAMING_SERVERS[3].baseUrl}/tv/${id}/${season}/${episode}?autoplay=1`;
+    case "cinezo":
+      return `${STREAMING_SERVERS[4].baseUrl}/tv/${id}?s=${season}&e=${episode}`;
+    case "vidcore":
+      return `${STREAMING_SERVERS[5].baseUrl}/tv/${id}/${season}/${episode}`;
+    case "vidking":
+      return `${STREAMING_SERVERS[6].baseUrl}/embed/tv/${id}/${season}/${episode}`;
+    case "vidlink":
+      return `${STREAMING_SERVERS[7].baseUrl}/tv/${id}/${season}/${episode}`;
     case "videasy":
-      return `${STREAMING_SERVERS[4].baseUrl}/tv/${id}/${season}/${episode}?nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true&color=8B5CF6&provider=Poseidon`;
+      return `${STREAMING_SERVERS[8].baseUrl}/tv/${id}/${season}/${episode}?nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true&color=8B5CF6&provider=Poseidon`;
+    case "vidsrc":
+      return `${STREAMING_SERVERS[9].baseUrl}/v3/embed/tv/${id}/${season}/${episode}`;
+    case "2embed":
+      return `${STREAMING_SERVERS[10].baseUrl}/embed/${id}?s=${season}&e=${episode}`;
     default:
       return `${STREAMING_SERVERS[0].baseUrl}/tv/${id}/${season}/${episode}`;
   }

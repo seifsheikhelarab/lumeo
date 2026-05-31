@@ -64,53 +64,66 @@ export default function TV() {
         </div>
       </form>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
-        {shows.map((show, idx) => (
+      {shows.length === 0 && query ? (
+        <div className="text-center py-24 animate-fade-in">
+          <p className="text-zinc-400 text-lg mb-2">No shows found for "{query}"</p>
+          <p className="text-zinc-600 text-sm mb-8">Try a different spelling or browse popular shows.</p>
           <Link
-            key={show.id}
-            to={`/tv/${show.id}`}
-            className="group block animate-fade-in-up"
-            style={{ animationDelay: `${idx * 30}ms` }}
+            to="/tv"
+            className="px-5 py-2.5 bg-white text-zinc-900 font-medium rounded-lg hover:bg-zinc-200 transition-colors"
           >
-            <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900 mb-3">
-              <img
-                src={getImageUrl(show.poster_path, "w500")}
-                alt={show.name}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                loading="lazy"
-                width={300}
-                height={450}
-              />
-            </div>
-            <h3 className="font-medium text-sm text-zinc-300 truncate group-hover:text-white transition-colors">
-              {show.name}
-            </h3>
-            <p className="text-xs text-zinc-600 mt-0.5">
-              TV Show
-            </p>
+            Browse All Shows
           </Link>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
+          {shows.map((show, idx) => (
+            <Link
+              key={show.id}
+              to={`/tv/${show.id}`}
+              className="group block animate-fade-in-up"
+              style={{ animationDelay: `${idx * 30}ms` }}
+            >
+              <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900 mb-3">
+                <img
+                  src={getImageUrl(show.poster_path, "w500")}
+                  alt={show.name}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
+                  width={300}
+                  height={450}
+                />
+              </div>
+              <h3 className="font-medium text-sm text-zinc-300 truncate group-hover:text-white transition-colors">
+                {show.name}
+              </h3>
+              <p className="text-xs text-zinc-600 mt-0.5">
+                TV Show
+              </p>
+            </Link>
+          ))}
+        </div>
+      )}
 
       <div className="flex justify-between items-center mt-16 pt-6 border-t border-zinc-800">
-        <div className="text-sm text-zinc-500">
-          Page {page} of {lastPage}
+        <div className="text-sm text-zinc-600">
+          Page {page}
         </div>
         <div className="flex gap-3">
           {page > 1 && (
             <Link
               to={`/tv?page=${page - 1}${query ? `&query=${query}` : ""}`}
-              className="px-5 py-2.5 bg-zinc-800 text-white font-medium rounded-lg hover:bg-zinc-700 transition-colors"
+              className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
             >
-              Previous
+              ← Previous
             </Link>
           )}
           {page < lastPage && (
             <Link
               to={`/tv?page=${page + 1}${query ? `&query=${query}` : ""}`}
-              className="px-5 py-2.5 bg-zinc-800 text-white font-medium rounded-lg hover:bg-zinc-700 transition-colors"
+              className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
             >
-              Next
+              Next →
             </Link>
           )}
         </div>

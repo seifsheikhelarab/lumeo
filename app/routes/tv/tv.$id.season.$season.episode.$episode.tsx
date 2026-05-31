@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { Route } from "./+types/tv.$id.season.$season.episode.$episode";
 import { getTVEmbedUrl, getTVShow, STREAMING_SERVERS } from "~/services/api";
 import type { TVShow, Season } from "~/types";
+import { ServerDropdown } from "~/components/UI/ServerDropdown";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const { id, season, episode } = params;
@@ -85,52 +86,45 @@ export default function TVWatch() {
         />
       </div>
 
-      <div className="flex flex-nowrap items-center justify-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
           <Link
             to={prevEpisode ? `/tv/${id}/season/${prevEpisode.season}/episode/${prevEpisode.episode}` : "#"}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${prevEpisode && hasPrev ? "bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-105 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${prevEpisode && hasPrev ? "bg-white text-zinc-900 hover:bg-zinc-200 hover:scale-105 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
             aria-disabled={!prevEpisode || !hasPrev}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Prev Episode
+            Prev
           </Link>
           <span className="px-4 py-2 bg-zinc-900 rounded-lg text-zinc-400 font-plex-mono">
             {episode}/{totalEpisodes}
           </span>
           <Link
             to={hasNext ? `/tv/${id}/season/${nextEpisode.season}/episode/${nextEpisode.episode}` : "#"}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${hasNext ? "bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-105 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${hasNext ? "bg-white text-zinc-900 hover:bg-zinc-200 hover:scale-105 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
             aria-disabled={!hasNext}
           >
-            Next Episode
+            Next
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
         </div>
 
-        <div className="flex flex-nowrap items-center justify-center gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <label htmlFor="server-select" className="text-zinc-400 text-sm">Server:</label>
-            <select
-              id="server-select"
-              value={server}
-              onChange={(e) => setServer(e.target.value)}
-              className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all"
-            >
-              {STREAMING_SERVERS.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <span className="text-zinc-500 text-sm">Server</span>
+            <ServerDropdown
+              servers={STREAMING_SERVERS}
+              selected={server}
+              onSelect={setServer}
+            />
           </div>
 
           <Link
             to={`/together?contentId=${id}&contentType=episode&season=${season}&episode=${episode}`}
-            className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            className="px-4 py-2 bg-white text-zinc-900 font-medium rounded-lg hover:bg-zinc-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -140,7 +134,7 @@ export default function TVWatch() {
 
           <Link
             to={`/tv/${id}`}
-            className="px-4 py-2 bg-zinc-800 text-white font-medium rounded-lg hover:bg-zinc-700 hover:scale-105 active:scale-95 transition-all"
+            className="inline-flex items-center min-h-[44px] text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
           >
             Back to Show
           </Link>
