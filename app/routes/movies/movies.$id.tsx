@@ -22,15 +22,15 @@ export function ErrorBoundary() {
   return <ErrorDisplay title="Error" message="Failed to load movie details. Please try again." />;
 }
 
-export function meta({ data }: Route.MetaArgs) {
-  const title = data?.movie?.title || "Movie";
-  const overview = data?.movie?.overview?.slice(0, 160) || "";
+export function meta({ loaderData }: Route.MetaArgs) {
+  const title = loaderData?.movie?.title || "Movie";
+  const overview = loaderData?.movie?.overview?.slice(0, 160) || "";
   return [
     { title: `${title} - Lumeo` },
     { name: "description", content: overview },
     { property: "og:title", content: `${title} - Lumeo` },
     { property: "og:description", content: overview },
-    { property: "og:image", content: data?.movie?.poster_path ? `https://image.tmdb.org/t/p/w500${data.movie.poster_path}` : "" },
+    { property: "og:image", content: loaderData?.movie?.poster_path ? `https://image.tmdb.org/t/p/w500${loaderData.movie.poster_path}` : "" },
     { property: "og:type", content: "video.movie" },
   ];
 }
@@ -158,6 +158,7 @@ export default function MovieDetails() {
             <Link
               to={`/movies/${movie.id}/watch`}
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-zinc-900 font-semibold rounded-lg hover:scale-105 hover:bg-zinc-200 active:scale-95 transition-all duration-200 animate-fade-in-up"
+              data-cuelume-press="success"
               style={{ animationDelay: "350ms" }}
             >
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">

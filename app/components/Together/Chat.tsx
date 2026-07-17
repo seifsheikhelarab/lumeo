@@ -43,7 +43,7 @@ export function Chat({ messages, onSendMessage }: ChatProps) {
             </p>
           ) : (
             messages.map((msg, idx) => (
-              <div key={msg.id || `msg-${idx}`} className="text-sm bg-zinc-800/50 p-2 rounded-lg border border-zinc-700/30">
+              <div key={msg.id || `msg-${idx}`} className="t-chat-msg text-sm bg-zinc-800/50 p-2 rounded-lg border border-zinc-700/30">
                 <span className="font-semibold text-zinc-100">{msg.userName || "Anonymous"}: </span>
                 <span className="text-zinc-200 break-words">{msg.message}</span>
               </div>
@@ -66,6 +66,7 @@ export function Chat({ messages, onSendMessage }: ChatProps) {
             type="submit"
             disabled={!input.trim()}
             className="bg-white text-zinc-900 font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded text-sm transition-colors"
+            data-cuelume-press
           >
             Send
           </button>

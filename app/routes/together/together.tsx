@@ -76,6 +76,7 @@ export default function TogetherCreate() {
           onClick={handleCreate}
           disabled={!userName.trim() || isCreating}
           className="w-full bg-white text-zinc-900 font-medium py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          data-cuelume-press
         >
           {isCreating ? "Creating..." : "Create Party"}
         </button>

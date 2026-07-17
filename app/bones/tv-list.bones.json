@@ -1,7 +1,7 @@
 {
   "breakpoints": {
     "375": {
-      "name": "movies-list",
+      "name": "tv-list",
       "viewportWidth": 327,
       "width": 327,
       "height": 1890,
@@ -268,7 +268,7 @@
       ]
     },
     "768": {
-      "name": "movies-list",
+      "name": "tv-list",
       "viewportWidth": 720,
       "width": 720,
       "height": 1023,
@@ -535,7 +535,7 @@
       ]
     },
     "1280": {
-      "name": "movies-list",
+      "name": "tv-list",
       "viewportWidth": 1232,
       "width": 1232,
       "height": 770,

@@ -1,5 +1,6 @@
 import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
+import { boneyardPlugin } from "boneyard-js/vite";
 import { defineConfig } from "vite";
 import { type ViteDevServer, type Plugin } from "vite";
 import express from "express";
@@ -150,5 +151,5 @@ function socketIoPlugin(): Plugin {
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   server: { port: 5173, host: true },
-  plugins: [tailwindcss(), reactRouter(), socketIoPlugin()],
+  plugins: [tailwindcss(), reactRouter(), socketIoPlugin(), boneyardPlugin({ out: "./app/bones", routes: ["/", "/movies", "/tv"] })],
 });

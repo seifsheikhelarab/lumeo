@@ -1,7 +1,8 @@
-import { Link, useLoaderData, useRouteError, isRouteErrorResponse } from "react-router";
+import { Link, useLoaderData, useNavigation, useRouteError, isRouteErrorResponse } from "react-router";
 import type { Route } from "./+types/tv";
 import { getTVShows, getImageUrl, imgErrorHandler } from "~/services/api";
 import { ErrorDisplay } from "~/components/UI/ErrorDisplay";
+import { Skeleton } from "boneyard-js/react";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -26,10 +27,10 @@ export function ErrorBoundary() {
   return <ErrorDisplay title="Error" message="Failed to load TV shows. Please try again." />;
 }
 
-export function meta({ data }: Route.MetaArgs) {
-  const title = data?.query ? `Search: ${data.query} - TV Shows - Lumeo` : "Browse TV Shows - Lumeo";
-  const desc = data?.query 
-    ? `Search results for "${data.query}". Find TV shows streaming online.`
+export function meta({ loaderData }: Route.MetaArgs) {
+  const title = loaderData?.query ? `Search: ${loaderData.query} - TV Shows - Lumeo` : "Browse TV Shows - Lumeo";
+  const desc = loaderData?.query
+    ? `Search results for "${loaderData.query}". Find TV shows streaming online.`
     : "Browse the latest and most popular TV shows. Watch streaming online free.";
   return [
     { title },
@@ -42,10 +43,26 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function TV() {
   const { shows, page, lastPage, query } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
-      <form method="GET" className="mb-10">
+      <Skeleton name="tv-list" loading={isLoading} fixture={
+        <div>
+          <div className="h-11 bg-zinc-800 rounded-lg mb-10 max-w-lg" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i}>
+                <div className="aspect-[2/3] bg-zinc-800 rounded-md mb-3" />
+                <div className="h-4 bg-zinc-800 rounded w-3/4 mb-1" />
+                <div className="h-3 bg-zinc-800/50 rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        </div>
+      }>
+        <form method="GET" className="mb-10">
         <div className="flex gap-3 max-w-lg">
           <input
             type="text"
@@ -58,6 +75,7 @@ export default function TV() {
           <button
             type="submit"
             className="px-5 py-2.5 bg-white text-zinc-900 font-medium rounded-lg hover:bg-zinc-100 transition-colors"
+            data-cuelume-press
           >
             Search
           </button>
@@ -81,26 +99,30 @@ export default function TV() {
             <Link
               key={show.id}
               to={`/tv/${show.id}`}
-              className="group block animate-fade-in-up"
+              className="group block animate-fade-in-up t-tilt"
+              data-cuelume-press
               style={{ animationDelay: `${idx * 30}ms` }}
             >
-              <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900 mb-3">
+              <div className="t-tilt-card">
+                <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900 mb-3">
 <img
     src={getImageUrl(show.poster_path, "w500")}
     alt={show.name}
-    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+    className="w-full h-full object-cover"
     loading="lazy"
     width={300}
     height={450}
     onError={imgErrorHandler}
   />
+                </div>
+                <h3 className="font-medium text-sm text-zinc-300 truncate group-hover:text-white transition-colors">
+                  {show.name}
+                </h3>
+                <p className="text-xs text-zinc-600 mt-0.5">
+                  TV Show
+                </p>
+                <div className="t-tilt-glare"></div>
               </div>
-              <h3 className="font-medium text-sm text-zinc-300 truncate group-hover:text-white transition-colors">
-                {show.name}
-              </h3>
-              <p className="text-xs text-zinc-600 mt-0.5">
-                TV Show
-              </p>
             </Link>
           ))}
         </div>
@@ -129,6 +151,7 @@ export default function TV() {
           )}
         </div>
       </div>
+      </Skeleton>
     </div>
   );
 }
