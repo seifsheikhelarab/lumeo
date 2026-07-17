@@ -11,6 +11,7 @@ function initTilt() {
 
   function track(e: PointerEvent) {
     if (reduce.matches) return;
+    if (e.pointerType !== "mouse") return;
     const tilt = (e.target as Element)?.closest?.(".t-tilt") as HTMLElement | null;
     if (!tilt) { if (current) reset(current); return; }
     const card = tilt.querySelector(".t-tilt-card") as HTMLElement | null;

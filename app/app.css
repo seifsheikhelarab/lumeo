@@ -347,7 +347,6 @@ a {
 }
 
 /* ── Card hover tilt ───────────────────────────────────────── */
-.t-tilt { touch-action: none; }
 .t-tilt-card {
   position: relative;
   border-radius: 12px;
