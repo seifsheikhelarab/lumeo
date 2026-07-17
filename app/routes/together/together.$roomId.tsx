@@ -1,6 +1,7 @@
 import { Link, useLoaderData } from "react-router";
 import { useEffect, useState, useCallback, useRef, useId } from "react";
 import { useParams, useNavigate, useLocation } from "react-router";
+import { play } from "cuelume";
 import {
   connectSocket,
   disconnectSocket,
@@ -53,6 +54,7 @@ export default function TogetherRoom() {
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [showNameModal, setShowNameModal] = useState(() => !location.state?.userName);
+  const [modalClosing, setModalClosing] = useState(false);
   const [playbackTime, setPlaybackTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackUpdatedBy, setPlaybackUpdatedBy] = useState<string | undefined>();
@@ -266,10 +268,21 @@ export default function TogetherRoom() {
   }, []);
 
   useEffect(() => {
-    if (!showNameModal && userName && !roomState && !error) {
+    if (!showNameModal && userName && !roomState && !error && !modalClosing) {
       handleJoin();
     }
   }, [showNameModal, userName]);
+
+  const closeModal = useCallback(() => {
+    setModalClosing(true);
+    const closeMs = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--modal-close-dur")
+    ) || 150;
+    setTimeout(() => {
+      setShowNameModal(false);
+      setModalClosing(false);
+    }, closeMs);
+  }, []);
 
   const handleLeave = () => {
     if (roomState) {
@@ -347,6 +360,7 @@ export default function TogetherRoom() {
   const copyLink = () => {
     const url = `${window.location.origin}/together/${roomState?.roomId}?contentId=${roomState?.contentId}&contentType=${roomState?.contentType}`;
     navigator.clipboard.writeText(url);
+    play("success");
   };
 
   const isTVEpisode = roomState?.contentType === "episode" && roomState?.season && roomState?.episode;
@@ -376,7 +390,7 @@ export default function TogetherRoom() {
   if (showNameModal) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-        <div className="bg-zinc-900 rounded-xl p-8 max-w-md w-full border border-zinc-800">
+        <div className={`t-modal bg-zinc-900 rounded-xl p-8 max-w-md w-full border border-zinc-800 ${modalClosing ? "is-closing" : "is-open"}`}>
           <h1 className="text-2xl font-bold text-white mb-2">
             {isJoinMode ? "Join Watch Party" : "Start Watch Party"}
           </h1>
@@ -405,6 +419,7 @@ export default function TogetherRoom() {
             onClick={handleJoin}
             disabled={!userName.trim() || isConnecting}
             className="w-full bg-white text-zinc-900 font-medium py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            data-cuelume-press
           >
             {isConnecting ? "Connecting..." : isJoinMode ? "Join Party" : "Create Party"}
           </button>
@@ -438,6 +453,7 @@ export default function TogetherRoom() {
             <button
               onClick={copyLink}
               className="inline-flex items-center min-h-[44px] text-zinc-400 hover:text-white transition-colors text-sm gap-2"
+              data-cuelume-hover="tick"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -447,6 +463,7 @@ export default function TogetherRoom() {
             <button
               onClick={handleLeave}
               className="inline-flex items-center min-h-[44px] text-red-400 hover:text-red-300 transition-colors text-sm"
+              data-cuelume-press="droplet"
             >
               Leave Party
             </button>
@@ -527,6 +544,7 @@ export default function TogetherRoom() {
                           ? "bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/50"
                           : "bg-white text-zinc-900 hover:bg-zinc-200"
                       }`}
+                      data-cuelume-toggle
                     >
                       {roomState.isStarted ? "Stop for Everyone" : "Start for Everyone"}
                     </button>

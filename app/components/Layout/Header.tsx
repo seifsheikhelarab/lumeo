@@ -7,6 +7,7 @@ export function Header() {
         <Link 
           to="/" 
           className="text-xl sm:text-2xl font-bold tracking-tight text-white hover:text-white transition-colors"
+          data-cuelume-hover
         >
           Lumeo
         </Link>
@@ -14,6 +15,7 @@ export function Header() {
           <li>
             <NavLink
               to="/movies"
+              data-cuelume-hover="tick"
               className={({ isActive }) =>
                 `inline-block py-2 text-sm font-medium transition-all duration-200 ${
                   isActive 
@@ -28,6 +30,7 @@ export function Header() {
           <li>
             <NavLink
               to="/tv"
+              data-cuelume-hover="tick"
               className={({ isActive }) =>
                 `inline-block py-2 text-sm font-medium transition-all duration-200 ${
                   isActive 

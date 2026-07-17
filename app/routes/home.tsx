@@ -36,12 +36,14 @@ export default function Home() {
               <Link
                 to="/movies"
                 className="px-6 py-3 bg-white text-zinc-900 font-medium rounded-lg hover:bg-zinc-100 hover:scale-105 active:scale-95 transition-all duration-200"
+                data-cuelume-press
               >
                 Browse Movies
               </Link>
               <Link
                 to="/tv"
                 className="px-6 py-3 text-zinc-300 font-medium rounded-lg border border-zinc-700 hover:bg-zinc-800 hover:scale-105 active:scale-95 transition-all duration-200"
+                data-cuelume-press
               >
                 TV Shows
               </Link>
@@ -57,23 +59,27 @@ export default function Home() {
                 <Link
                   key={movie.id}
                   to={`/movies/${movie.id}`}
-                  className="group block"
+                  className="group block t-tilt"
+                  data-cuelume-press
                   style={{ animationDelay: `${idx * 50}ms` }}
                 >
-                  <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900">
+                  <div className="t-tilt-card">
+                    <div className="aspect-[2/3] rounded-md overflow-hidden bg-zinc-900">
 <img
     src={getImageUrl(movie.poster_path, "w342")}
     alt={movie.title}
-    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+    className="w-full h-full object-cover"
     loading="lazy"
     width={200}
     height={300}
     onError={imgErrorHandler}
   />
+                    </div>
+                    <h3 className="font-medium text-xs text-zinc-500 truncate mt-2 group-hover:text-zinc-300 transition-colors">
+                      {movie.title}
+                    </h3>
+                    <div className="t-tilt-glare"></div>
                   </div>
-                  <h3 className="font-medium text-xs text-zinc-500 truncate mt-2 group-hover:text-zinc-300 transition-colors">
-                    {movie.title}
-                  </h3>
                 </Link>
               ))}
             </div>

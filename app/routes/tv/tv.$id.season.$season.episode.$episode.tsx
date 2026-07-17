@@ -91,6 +91,7 @@ export default function TVWatch() {
             to={prevEpisode ? `/tv/${id}/season/${prevEpisode.season}/episode/${prevEpisode.episode}` : "#"}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${prevEpisode && hasPrev ? "bg-white text-zinc-900 hover:bg-zinc-200 hover:scale-105 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
             aria-disabled={!prevEpisode || !hasPrev}
+            data-cuelume-hover="tick"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -104,6 +105,7 @@ export default function TVWatch() {
             to={hasNext ? `/tv/${id}/season/${nextEpisode.season}/episode/${nextEpisode.episode}` : "#"}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${hasNext ? "bg-white text-zinc-900 hover:bg-zinc-200 hover:scale-105 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
             aria-disabled={!hasNext}
+            data-cuelume-hover="tick"
           >
             Next
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,6 +127,7 @@ export default function TVWatch() {
           <Link
             to={`/together?contentId=${id}&contentType=episode&season=${season}&episode=${episode}`}
             className="px-4 py-2 bg-white text-zinc-900 font-medium rounded-lg hover:bg-zinc-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            data-cuelume-press
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
