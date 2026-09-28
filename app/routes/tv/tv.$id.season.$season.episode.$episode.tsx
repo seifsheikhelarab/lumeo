@@ -1,9 +1,10 @@
 import { Link, useLoaderData } from "react-router";
 import { useState } from "react";
 import type { Route } from "./+types/tv.$id.season.$season.episode.$episode";
-import { getTVEmbedUrl, getTVShow, STREAMING_SERVERS } from "~/services/api";
-import type { TVShow, Season } from "~/types";
+import { getTVEmbedUrl, getTVShow, getTVSeason, STREAMING_SERVERS } from "~/services/api";
+import type { TVShow, Episode } from "~/types";
 import { ServerDropdown } from "~/components/UI/ServerDropdown";
+import { EpisodeDropdown } from "~/components/UI/EpisodeDropdown";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const { id, season, episode } = params;
@@ -16,7 +17,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   }
   
   if (!show) {
-    return { id, season, episode, showName: "Episode", totalEpisodes: 1, hasPrev: false, hasNext: false };
+    return { id, season, episode, showName: "Episode", totalEpisodes: 1, hasPrev: false, hasNext: false, seasons: [], episodes: [] };
   }
   
   const currentSeasonNum = Number(season);
@@ -27,6 +28,20 @@ export async function loader({ params }: Route.LoaderArgs) {
   
   const isFirstEpisode = currentSeasonNum === 1 && currentEpisodeNum === 1;
   const isLastEpisode = isLastInShow(show, currentSeasonNum, currentEpisodeNum, totalEpisodes);
+
+  const seasons = show.seasons
+    .filter(s => s.season_number > 0 && s.episode_count > 0)
+    .map(s => ({ season_number: s.season_number, name: s.name, episode_count: s.episode_count }));
+
+  let episodes: Episode[] = [];
+  if (currentSeason && currentSeason.episode_count > 0) {
+    try {
+      const details = await getTVSeason(id!, currentSeasonNum);
+      episodes = details.episodes.filter(ep => ep.episode_number > 0);
+    } catch (e) {
+      console.error("Failed to load season episodes:", e);
+    }
+  }
   
   return {
     id,
@@ -36,6 +51,8 @@ export async function loader({ params }: Route.LoaderArgs) {
     totalEpisodes,
     hasPrev: !isFirstEpisode,
     hasNext: !isLastEpisode,
+    seasons,
+    episodes,
   };
 }
 
@@ -54,7 +71,8 @@ export function meta() {
 }
 
 export default function TVWatch() {
-  const { id, season, episode, showName, totalEpisodes, hasPrev, hasNext } = useLoaderData<typeof loader>();
+  const { id, season, episode, showName, totalEpisodes, hasPrev, hasNext, seasons, episodes } =
+    useLoaderData<typeof loader>();
   const [server, setServer] = useState("vidfast");
   const embedUrl = getTVEmbedUrl(id!, season!, episode!, server);
   
@@ -98,9 +116,19 @@ export default function TVWatch() {
             </svg>
             Prev
           </Link>
-          <span className="px-4 py-2 bg-zinc-900 rounded-lg text-zinc-400 font-plex-mono">
-            {episode}/{totalEpisodes}
-          </span>
+          {seasons.length > 0 ? (
+            <EpisodeDropdown
+              showId={id!}
+              seasons={seasons}
+              currentSeason={currentSeason}
+              currentEpisode={currentEpisode}
+              initialEpisodes={episodes}
+            />
+          ) : (
+            <span className="px-4 py-2 bg-zinc-900 rounded-lg text-zinc-400 font-plex-mono">
+              {episode}/{totalEpisodes}
+            </span>
+          )}
           <Link
             to={hasNext ? `/tv/${id}/season/${nextEpisode.season}/episode/${nextEpisode.episode}` : "#"}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${hasNext ? "bg-white text-zinc-900 hover:bg-zinc-200 hover:scale-105 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
