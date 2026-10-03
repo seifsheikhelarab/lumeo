@@ -137,7 +137,7 @@ export function EpisodeDropdown({
         </svg>
       </button>
 
-      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[min(90vw,420px)] z-[60]">
+      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[min(90vw,420px)] z-[60]">
         <div
           className={`t-dropdown bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden shadow-2xl z-[60] ${dropdownClass}`}
           data-origin="top-center"
